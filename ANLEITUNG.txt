@@ -1,0 +1,29 @@
+TRAINING APP
+
+EINRICHTEN (einmalig, etwa 10 Minuten)
+1. Auf github.com einloggen, oben rechts auf "+" und "New repository".
+2. Name: training, Sichtbarkeit: Public, dann "Create repository".
+3. Auf "uploading an existing file" klicken, alle Dateien aus diesem Ordner
+   hineinziehen (die Dateien, nicht den Ordner) und "Commit changes".
+4. Settings > Pages > Source "Deploy from a branch", Branch "main",
+   Ordner "/ (root)", Save.
+5. Nach 1 bis 2 Minuten https://DEINNAME.github.io/training/ in Safari
+   auf dem iPhone öffnen (DEINNAME = dein GitHub-Name).
+6. Teilen > "Zum Home-Bildschirm". Fertig.
+
+Ab dann läuft die App offline. Deine Trainingsdaten liegen nur auf dem
+iPhone, nicht auf GitHub. Das Repository enthält nur den Code.
+
+UPDATE
+Neue index.html auf GitHub hochladen und die alte ersetzen. Die App holt
+sich das Update beim nächsten Öffnen mit Internet selbst und zeigt es
+spätestens beim zweiten Start.
+
+BACKUP
+Fortschritt > Backup sichern > "In Dateien sichern" (iCloud Drive).
+Die App erinnert dich, wenn das letzte Backup älter als 30 Tage ist.
+Neues Handy: App wie oben installieren, dann Fortschritt > Backup laden.
+
+WICHTIG
+Das Symbol auf dem Home-Bildschirm nicht löschen. Damit wären auch die
+Daten weg, außer du hast ein Backup.
