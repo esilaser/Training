@@ -855,7 +855,7 @@ function measCard(){
 }
 
 /* Cloud: Firebase per REST, eigenes Konto pro Profil, Trainings werden zusammengeführt */
-const FBCFG={apiKey:'',projectId:''};
+const FBCFG={apiKey:'AIzaSyDTCb8JTtj23xp7DHS8tcCEGOWz9xEP1Sc',projectId:'traning-c6b1e'};
 function FB(){try{const c=JSON.parse(localStorage.getItem('training-fb')||'null');if(c&&c.apiKey&&c.projectId)return c}catch(e){}return FBCFG.apiKey?FBCFG:null}
 let TOK=null,syncing=false,syncT=null,TEAM=null,TEAMAT=0,TEAMLD=false,CFGOPEN=false;
 function touch(){S.updated=Date.now();kick()}
@@ -865,6 +865,8 @@ function fbErr(e){const m=String(e&&e.message||e);
   if(/EMAIL_EXISTS/.test(m))return'Für diese E-Mail gibt es schon ein Konto. Melde dich an.';
   if(/INVALID_LOGIN|INVALID_PASSWORD|EMAIL_NOT_FOUND/.test(m))return'E-Mail oder Passwort stimmt nicht.';
   if(/WEAK_PASSWORD/.test(m))return'Das Passwort braucht mindestens 6 Zeichen.';
+  if(/OPERATION_NOT_ALLOWED|CONFIGURATION_NOT_FOUND/.test(m))return'In Firebase ist die Anmeldung mit E-Mail und Passwort noch nicht eingeschaltet.';
+  if(/HTTP 404/.test(m))return'Die Firestore-Datenbank fehlt noch. Leg sie in Firebase an.';
   if(/INVALID_EMAIL/.test(m))return'Die E-Mail-Adresse stimmt nicht.';
   if(/403|PERMISSION/.test(m))return'Zugriff verweigert. Sind die Firestore-Regeln eingetragen?';
   if(/fetch|Network|Load failed/i.test(m))return'Keine Verbindung.';
@@ -881,7 +883,7 @@ async function token(){
   S.cloud.rt=j.refresh_token;TOK={t:j.id_token,exp:Date.now()+(+j.expires_in-60)*1000,uid:j.user_id};save();return TOK.t;
 }
 const docBase=()=>`https://firestore.googleapis.com/v1/projects/${FB().projectId}/databases/(default)/documents`;
-async function fsReq(path,opt){const r=await fetch(`${docBase()}/${path}`,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+await token()},opt&&opt.body?{'Content-Type':'application/json'}:{})}));if(r.status===404)return null;if(!r.ok)throw new Error('HTTP '+r.status);return r.status===204?{}:r.json()}
+async function fsReq(path,opt){const r=await fetch(`${docBase()}/${path}`,Object.assign({},opt,{headers:Object.assign({Authorization:'Bearer '+await token()},opt&&opt.body?{'Content-Type':'application/json'}:{})}));if(r.status===404&&!(opt&&opt.method))return null;if(!r.ok)throw new Error('HTTP '+r.status);return r.status===204?{}:r.json()}
 const fsGet=p=>fsReq(p);
 const fsPut=(p,o)=>fsReq(p,{method:'PATCH',body:JSON.stringify({fields:{json:{stringValue:JSON.stringify(o)}}})});
 async function fsList(p){const j=await fsReq(p+'?pageSize=300');return(j&&j.documents)||[]}
