@@ -201,6 +201,10 @@ nav.tabs button[aria-current="page"]{color:var(--blue)}
 .sci{margin:8px 0 0;padding-left:18px}.sci li{margin:8px 0;font-size:15px;color:var(--muted)}.sci b{color:var(--ink)}
 .first{background:var(--blue-soft);border-radius:16px;padding:14px 16px;margin-top:12px}
 .badge{display:inline-block;background:var(--blue);color:var(--blue-ink);font-size:12px;font-weight:700;border-radius:6px;padding:1px 6px;margin-left:6px;vertical-align:2px}
+.toprow{display:flex;justify-content:space-between;align-items:center;gap:12px}
+.who{width:44px;height:44px;border-radius:50%;border:0;background:var(--blue);color:var(--blue-ink);font:700 21px var(--cond);flex:none;padding:0}
+.av{width:44px;height:44px;border-radius:50%;background:var(--blue-soft);color:var(--blue);display:grid;place-items:center;font:700 21px var(--cond)}
+.xrow.pr2{grid-template-columns:48px 1fr}
 @media (prefers-reduced-motion:reduce){.sheet,.prog,.toast,.rover,.scrim{transition:none}}
 </style>
 </head>
@@ -281,7 +285,7 @@ const LIB=[
 ['beinstrecker','Beinstrecker','g','qu','','r',10,15,90,5,1,'',25,'Oben kurz halten und langsam ablassen.'],
 ['rdl','Rumänisches Kreuzheben','g','hi','ru','r',8,12,120,2,1,'cs',14,'Hüfte nach hinten schieben, Rücken gerade, Hanteln nah am Bein.'],
 ['beinbeuger','Beinbeuger sitzend','g','hi','','r',10,15,90,5,1,'s',25,'Sitzend statt liegend, das dehnt den Beinbeuger mehr.'],
-['hipthrust','Hip Thrust','g','hi','qu','r',8,12,120,5,2,'c',40,'Oben den Po fest anspannen, Kinn Richtung Brust.'],
+['hipthrust','Hip Thrust','g','hi','qu','r',8,12,120,5,1,'c',40,'Oben den Po fest anspannen, Kinn Richtung Brust.'],
 ['hyperextension','Hyperextensions','g','hi','ru','r',10,15,90,0,1,'',0,'Aus der Hüfte aufrichten, oben nicht überstrecken.'],
 ['kreuzheben','Kreuzheben','g','hi','ru,qu','r',5,8,150,5,2,'c',50,'Stange nah am Körper, Rücken gerade, aus den Beinen drücken.'],
 ['wadenheben','Wadenheben stehend','b','wa','','r',10,15,60,5,1,'s',40,'Stehend wachsen die Waden besser als sitzend. Unten dehnen, oben halten.'],
@@ -465,7 +469,7 @@ function hydrate(){document.querySelectorAll('[data-thumb]').forEach(el=>{if(!el
 (function loop(ts){animEls.forEach(el=>{if(el.isConnected)el.innerHTML=fig(el.dataset.anim,ts)});requestAnimationFrame(loop)})(0);
 
 /* Zustand */
-function defaults(){return{v:4,setup:{days:{0:'g',2:'g',4:'g'},pad:{x:0,y:.1},dur:'auto',lvl:1,split:'auto'},plan:null,swaps:{},history:[],session:null,body:[],settings:{goalKg:77},lastBackup:null}}
+function defaults(){return{v:4,setup:{days:{0:'g',2:'g',4:'g'},pad:{x:0,y:.1},dur:'auto',lvl:1,split:'auto',goal:'muskel',focus:[]},plan:null,swaps:{},history:[],session:null,body:[],settings:{goalKg:0},lastBackup:null}}
 function normalize(s){
   const d=defaults();
   if(!s||typeof s!=='object')return d;
@@ -483,9 +487,15 @@ function normalize(s){
   if(s.session&&!Array.isArray(s.session.items))s.session=null;
   return s;
 }
-let S;
-try{const raw=localStorage.getItem(KEY)||localStorage.getItem('training-app-v2');S=normalize(JSON.parse(raw))}catch(e){S=defaults()}
-function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){toast('Speichern nicht möglich. Ist der Speicher voll?')}}
+const PKEY='training-profiles',dkey=id=>id==='p0'?KEY:KEY+':'+id;
+let PR=null,S,firstRun=false;
+try{PR=JSON.parse(localStorage.getItem(PKEY))}catch(e){}
+function savePR(){try{localStorage.setItem(PKEY,JSON.stringify(PR))}catch(e){}}
+if(!PR||!Array.isArray(PR.list)||!PR.list.length){let has=false;try{has=!!(localStorage.getItem(KEY)||localStorage.getItem('training-app-v2'))}catch(e){}PR={list:[{id:'p0',name:'Profil 1'}],active:'p0'};firstRun=!has;savePR()}
+function loadProfile(id){let raw=null;try{raw=localStorage.getItem(dkey(id))||(id==='p0'?localStorage.getItem('training-app-v2'):null)}catch(e){}try{return normalize(raw?JSON.parse(raw):null)}catch(e){return defaults()}}
+S=loadProfile(PR.active);if(firstRun)S.onb=true;
+function save(){try{localStorage.setItem(dkey(PR.active),JSON.stringify(S))}catch(e){toast('Speichern nicht möglich. Ist der Speicher voll?')}}
+const me=()=>PR.list.find(p=>p.id===PR.active)||PR.list[0];
 let tab='heute',armed=null,ovWd=null,ovPl=null,showAll=false,backupText=null,pasteOpen=false,dragging=false;
 const openHist=new Set(),app=document.getElementById('app');
 const H=()=>[...S.history].sort((a,b)=>a.start-b.start);
@@ -507,7 +517,13 @@ const BASE={br:8,ru:8,sc:6,bi:4,tr:4,qu:8,hi:6,wa:4,ba:4};
 const DT={GK:['Ganzkörper',GORD],O:['Oberkörper',['br','ru','sc','tr','bi','ba']],U:['Unterkörper',['qu','hi','wa','ba']],PU:['Push',['br','sc','tr']],PL:['Pull',['ru','sc','bi','ba']],BE:['Beine',['qu','hi','wa','ba']],
   BT:['Brust und Trizeps',['br','tr']],RB:['Rücken und Bizeps',['ru','bi','ba']],BS:['Beine und Schultern',['qu','hi','wa','sc']],SA:['Schultern und Arme',['sc','tr','bi','ba']],
   BRU:['Brust',['br','ba']],RUE:['Rücken',['ru','ba']],SCH:['Schultern',['sc','ba']],ARM:['Arme',['tr','bi']],CA:['Ausdauer und Bauch',['ba']]};
-const REAR=new Set(['facepull','reverse_butterfly','snow_angel']);
+const REAR=new Set(['facepull','reverse_butterfly','snow_angel']),PO=new Set(['hipthrust','glute_bridge','einbeinige_bridge','rdl','einbeinig_rdl']);
+const GOALS=[['muskel','Muskelaufbau'],['kraft','Kraft'],['fit','Straffen und Fitness'],['abnehmen','Abnehmen']];
+const GOALPAD={muskel:{x:0,y:.1},kraft:{x:0,y:.45},fit:{x:0,y:-.25},abnehmen:{x:0,y:-.5}};
+const GOALTXT={muskel:'Mittlere Wiederholungszahlen, der Plan achtet vor allem auf genug Sätze pro Muskel.',kraft:'Grundübungen mit weniger Wiederholungen und längeren Pausen. Kraft wächst vor allem durch schwere Sätze und häufiges Üben.',fit:'Muskelaufbau plus etwas Ausdauer. Straffer wirkt der Körper durch mehr Muskeln und weniger Fett.',abnehmen:'Krafttraining erhält beim Abnehmen die Muskeln, dazu kommt mehr Ausdauer. Den größten Teil macht aber die Ernährung aus.'};
+const FOCI=[['po','Po'],['beine','Beine'],['bauch','Bauch'],['ruecken','Rücken'],['brust','Brust'],['schultern','Schultern'],['arme','Arme']];
+const FG={po:['hi'],beine:['qu','hi'],bauch:['ba'],ruecken:['ru'],brust:['br'],schultern:['sc'],arme:['bi','tr']};
+function RR(e){if(S.setup.goal==='kraft'&&e.c&&e.t==='r'){const lo=Math.max(3,e.lo-3);return{lo,hi:Math.max(lo+2,e.hi-4),rest:e.rest+60}}return{lo:e.lo,hi:e.hi,rest:e.rest}}
 function weights(){
   const{x,y}=S.setup.pad,Q={u:[-1,0],l:[1,0],a:[0,-1],f:[0,1]},w={};let s=0;
   for(const k in Q){w[k]=Math.max(0,1.5-Math.hypot(x-Q[k][0],y-Q[k][1]))**2;s+=w[k]}
@@ -528,16 +544,18 @@ function splitTypes(n){
 }
 function targets(){const w=weights(),r=w.u/(w.u+w.l),mu=.35+1.3*r,ml=.35+1.3*(1-r),lv=S.setup.lvl===2?1.5:1,sf=1-.7*Math.max(0,w.a-.15),T={};let raw=0,base=0;
   for(const g in BASE){if(g==='ba')continue;base+=BASE[g];raw+=BASE[g]*(UP.includes(g)?mu:ml)}
-  for(const g in BASE)T[g]=Math.round(BASE[g]*lv*sf*(g==='ba'?1:(UP.includes(g)?mu:ml)*base/raw));return T}
+  for(const g in BASE)T[g]=Math.round(BASE[g]*lv*sf*(g==='ba'?1:(UP.includes(g)?mu:ml)*base/raw));
+  const fs=new Set((S.setup.focus||[]).flatMap(f=>FG[f]||[]));if(fs.size)for(const g in T)T[g]=Math.round(T[g]*(fs.has(g)?1.5:g==='ba'?1:.9));return T}
 const cardioMin=()=>{const a=weights().a;return a<.06?0:Math.round(a*180/5)*5};
 const capMin=()=>S.setup.dur==='auto'?(S.setup.lvl===1?60:75):S.setup.dur;
-const setSec=e=>e.t==='t'?(e.lo<300?e.lo+e.rest+15:0):((e.lo+e.hi)/2*3+25+e.rest);
+const setSec=e=>{const r=RR(e);return e.t==='t'?(e.lo<300?e.lo+e.rest+15:0):((r.lo+r.hi)/2*3+25+r.rest)};
 function est(e,sets,v){if(e.id==='warm')return 330;if(e.t==='t'&&e.lo>=300)return(v||e.lo)+60;return(sets||3)*setSec(e)+50}
 const avail=(e,pl)=>(e.pl==='b'||e.pl===pl)&&e.lvl<=S.setup.lvl;
 function pick(g,pl,type,items,used,first,comp){
   let c=EX.filter(e=>e.g===g&&avail(e,pl)&&!items.some(i=>i.id===e.id));
   if(g==='sc'&&type==='PL'){const f=c.filter(e=>REAR.has(e.id));if(f.length)c=f}
   else if(g==='sc'&&first){const f=c.filter(e=>!REAR.has(e.id));if(f.length)c=f}
+  if(g==='hi'&&(S.setup.focus||[]).includes('po')){const f=c.filter(e=>PO.has(e.id));if(f.length)c=f}
   const key=e=>((first||comp)?(e.c?0:4):(e.c?4:0))+((!e.c&&e.s)?0:1);
   c.sort((a,b)=>key(a)-key(b)||(used[a.id]||0)-(used[b.id]||0)||a.i-b.i);
   return c[0]||null;
@@ -557,9 +575,10 @@ function genPlan(){
     const mn=()=>2,sg=GORD.filter(g=>alloc[i][g]).map(g=>({g,s:alloc[i][g]}));
     const cm=type==='CA'?Math.min(60,Math.max(20,Math.round(C/caN/5)*5)):caN?0:(C?Math.min(Math.round(capMin()*.5/5)*5,Math.max(10,Math.round(C/n/5)*5)):0);
     {
-      const budget=capMin()*60/k-330-cm*60-(w.f>=.5?300:0),per=x=>x.s*(['qu','hi','br','ru'].includes(x.g)?190:150)+50,sum=()=>sg.reduce((a,x)=>a+per(x),0);
-      if(sum()>budget){const f=Math.max(.2,budget/sum());sg.forEach(x=>{x.s=Math.max(mn(x.g),Math.floor(x.s*f))});
-        for(const g of['ba','wa','bi','tr','sc','hi','ru','br','qu']){if(sum()<=budget+60||sg.length<=2)break;const q=sg.findIndex(x=>x.g===g);if(q>=0)sg.splice(q,1)}}
+      const fs=new Set((S.setup.focus||[]).flatMap(f=>FG[f]||[])),base=S.setup.dur==='auto'?(S.setup.lvl===1?60:75)+Math.min(cm,15):S.setup.dur;
+      const budget=base*60/k-330-cm*60-(w.f>=.5?300:0),per=x=>x.s*(['qu','hi','br','ru'].includes(x.g)?165:125)+45,sum=()=>sg.reduce((a,x)=>a+per(x),0);
+      if(sum()>budget){const fix=sg.filter(x=>fs.has(x.g)).reduce((a,x)=>a+per(x),0),f=Math.max(.2,(budget-fix)/Math.max(1,sum()-fix));sg.forEach(x=>{if(!fs.has(x.g))x.s=Math.max(mn(x.g),Math.floor(x.s*f))});
+        for(const g of['ba','wa','bi','tr','sc','hi','ru','br','qu']){if(sum()<=budget+60||sg.length<=2)break;if(fs.has(g))continue;const q=sg.findIndex(x=>x.g===g);if(q>=0)sg.splice(q,1)}}
     }
     sg.forEach(({g,s})=>{
       const big=['br','ru','qu','hi','sc'].includes(g),ne=s<=4?1:s<=7?2:3,base=Math.floor(s/ne);let r=s-base*ne;
@@ -597,7 +616,7 @@ function bw(){const B=[...S.body].sort((a,b)=>a.d<b.d?-1:1);return B.length?B[B.
 function startW(e){const b=bw(),x=e.sw*(b?b/70:1);return e.step>0?Math.max(e.step,Math.round(x/e.step)*e.step):0}
 const stepFor=(e,pl)=>pl==='h'||e.pl==='h'?0:e.step;
 function suggest(e,it,step){
-  const n=it.sets||3,lo=e.lo,hi=e.hi,P=sessionsFor(e.id,e.name),L=P[0];
+  const n=it.sets||3,{lo,hi}=RR(e),P=sessionsFor(e.id,e.name),L=P[0];
   if(e.t==='t'){if(lo>=300)return{w:0,v:[it.v||lo]};if(!L)return{w:0,v:Array(n).fill(lo)};const b=Math.min(hi,Math.max(...L.map(s=>s.v))+5);return{w:0,v:Array(n).fill(b),note:b>lo?`Ziel: ${b} Sekunden, etwas mehr als letztes Mal.`:''}}
   if(step<=0){
     if(!L)return{w:0,v:Array(n).fill(lo)};
@@ -617,7 +636,7 @@ function target(e,it,pl){
   if(e.id==='warm')return'5 min locker';
   const sg=suggest(e,it,stepFor(e,pl)),n=it.sets||3;
   if(e.t==='t'){const v=sg.v[0];return v>=300?`${Math.round(v/60)} min`:`${n} × ${v} s`}
-  if(sg.first)return`${n} × ${e.lo} bis ${e.hi} Wdh.`;
+  if(sg.first)return`${n} × ${RR(e).lo} bis ${RR(e).hi} Wdh.`;
   return`${n} × ${sg.v[0]} Wdh.${sg.w?`, ${sg.up?'↑ ':''}${kg(sg.w)} kg`:''}`;
 }
 /* Ansichten */
@@ -636,7 +655,7 @@ function notices(){
 }
 function todayView(){
   const now=Date.now(),wd=wdOf(now),done=H().filter(h=>ymd(h.start)===ymd(now));
-  let h=`<h1>${WDL[wd]}</h1>`+notices()+strip();
+  let h=`<div class="toprow"><h1>${WDL[wd]}</h1><button class="who" data-act="profiles" aria-label="Profil: ${esc(me().name)}">${esc(me().name.slice(0,1).toUpperCase())}</button></div>`+notices()+strip();
   if(!Object.keys(S.plan.days).length)return h+'<section class="today"><h2>Noch kein Plan</h2><p class="muted">Leg deine Trainingstage fest, der Rest passiert automatisch.</p><button class="btn primary big" data-tab="plan">Plan einrichten</button></section>';
   const use=ovWd??(S.plan.days[wd]&&!done.length?wd:null),nx=nextWd(wd);
   if(use==null){
@@ -664,6 +683,8 @@ function planView(){
   return`<h1>Plan</h1>
   <section class="card"><h2>Trainingstage</h2><p class="muted small">Antippen wechselt zwischen Gym, Zuhause und frei.</p>
     <div class="days">${WD.map((d,i)=>{const v=P.days[i];return`<button data-act="day" data-d="${i}" class="${v||''}" aria-label="${WDL[i]}: ${v?dl[v]:'frei'}">${d}<small>${v?dl[v]:'frei'}</small></button>`}).join('')}</div></section>
+  <section class="card"><h2>Ziel</h2><div class="chips">${GOALS.map(([v,l])=>`<button class="chip" data-act="goal" data-v="${v}" aria-pressed="${P.goal===v}">${l}</button>`).join('')}</div><p class="tip">${GOALTXT[P.goal]||''}</p>
+    <h2 style="margin-top:18px">Extra-Fokus</h2><p class="muted small">Optional. Diese Muskeln bekommen etwa 50 % mehr Sätze.</p><div class="chips">${FOCI.map(([v,l])=>`<button class="chip" data-act="focus" data-v="${v}" aria-pressed="${(P.focus||[]).includes(v)}">${l}</button>`).join('')}</div></section>
   <section class="card"><h2>Aufteilung</h2><div class="chips">${[['auto','Automatisch'],['gk','Ganzkörper'],['ou','Oberkörper / Unterkörper'],['ppl','Push / Pull / Beine'],['bro','Einzelne Muskeln']].map(([v,l])=>`<button class="chip" data-act="split" data-v="${v}" aria-pressed="${P.split===v}">${l}</button>`).join('')}</div><p class="tip">${esc(splitRec())}</p></section>
   <section class="card"><h2>Schwerpunkt</h2><p class="muted small">Links und rechts verteilt die Sätze zwischen Oberkörper und Beinen. Oben kommt Ausdauer dazu, unten mehr Ganzkörperübungen.</p>
     <div class="pad" id="pad" role="slider" aria-label="Schwerpunkt"><span class="lb t">Ausdauer<b id="pa"></b></span><span class="lb b"><b id="pf"></b>Ganzkörper</span><span class="lb l">Ober&shy;körper<b id="pu"></b></span><span class="lb r">Beine<b id="pl"></b></span><i class="knob" id="knob" style="left:${(P.pad.x+1)*50}%;top:${(P.pad.y+1)*50}%"></i></div></section>
@@ -744,11 +765,35 @@ function progressView(){
 }
 function rel(t){const a=new Date(t),b=new Date();a.setHours(0,0,0,0);b.setHours(0,0,0,0);const n=Math.round((b-a)/DAY);return n<=0?'heute':n===1?'gestern':`vor ${n} Tagen`}
 function render(){
+  if(S.onb){document.body.classList.add('intrain');app.innerHTML=onbView();return}
   document.body.classList.toggle('intrain',!!S.session&&tab==='heute');
   document.querySelectorAll('nav.tabs button').forEach(b=>b.setAttribute('aria-current',b.dataset.tab===tab?'page':'false'));
   app.innerHTML=tab==='heute'?(S.session?focusView():todayView()):tab==='plan'?planView():progressView();
   if(tab==='plan')padLabels();
   hydrate();tick();
+}
+
+/* Neues Profil */
+const obDefaults=()=>({name:'',goal:'muskel',focus:[],lvl:1,pl:'g',n:3,bw:''});
+let OB=obDefaults();
+function onbView(){
+  const c=(act,v,on,l)=>`<button class="chip" data-act="${act}" data-v="${v}" aria-pressed="${on}">${l}</button>`;
+  return`<h1>Willkommen</h1><p class="muted" style="margin:-4px 0 16px">Sechs kurze Fragen, dann steht dein Plan.</p>
+  <section class="card"><h2>Wie heißt du?</h2><input class="field" data-ob="name" value="${esc(OB.name)}" placeholder="Name" autocomplete="off" style="margin-top:8px" aria-label="Name"></section>
+  <section class="card"><h2>Was ist dein Ziel?</h2><div class="chips">${GOALS.map(([v,l])=>c('obg',v,OB.goal===v,l)).join('')}</div><p class="tip">${GOALTXT[OB.goal]}</p></section>
+  <section class="card"><h2>Extra-Fokus</h2><p class="muted small">Optional, mehrere möglich. Diese Muskeln bekommen mehr Sätze.</p><div class="chips">${FOCI.map(([v,l])=>c('obf',v,OB.focus.includes(v),l)).join('')}</div></section>
+  <section class="card"><h2>Wie viel Erfahrung?</h2><div class="chips">${c('obl',1,OB.lvl===1,'Anfänger')}${c('obl',2,OB.lvl===2,'Fortgeschritten')}</div></section>
+  <section class="card"><h2>Wo und wie oft pro Woche?</h2><div class="chips">${c('obp','g',OB.pl==='g','Gym')}${c('obp','h',OB.pl==='h','Zuhause')}</div><div class="chips">${[2,3,4,5].map(n=>c('obn',n,OB.n===n,n+' Tage')).join('')}</div></section>
+  <section class="card"><h2>Körpergewicht</h2><p class="muted small">Optional. Damit passen die vorgeschlagenen Startgewichte besser.</p><input class="field num" data-ob="bw" inputmode="decimal" value="${esc(OB.bw)}" placeholder="kg" style="margin-top:8px" aria-label="Körpergewicht in kg"></section>
+  <button class="btn primary big" data-act="obgo">Plan erstellen</button>${PR.list.length>1?'<button class="link center" data-act="obcancel">Abbrechen</button>':''}`;
+}
+function profSheet(){
+  openSheet(`<h3>Profile</h3><div>${PR.list.map(p=>`<button class="xrow pr2" data-act="pswitch" data-id="${p.id}"><span class="av">${esc(p.name.slice(0,1).toUpperCase())}</span><span><b>${esc(p.name)}</b><small>${p.id===PR.active?'Aktiv':'Tippen zum Wechseln'}</small></span></button>`).join('')}</div>
+    <button class="btn primary wide" data-act="pnew">Neues Profil anlegen</button>
+    <div class="inrow"><input class="field" id="prn" value="${esc(me().name)}" aria-label="Name des aktiven Profils" autocomplete="off"><button class="btn ghost" data-act="prename">Umbenennen</button></div>
+    ${PR.list.length>1?`<button class="link danger center" data-act="pdel">${armed==='pdel'?'Nochmal tippen: aktives Profil löschen':'Aktives Profil löschen'}</button>`:''}
+    <p class="tip">Jedes Profil hat eigene Pläne, Trainings und Statistiken. Auf einem eigenen Handy braucht es kein zweites Profil, dort sind die Daten sowieso getrennt.</p>
+    <button class="link center" data-act="sheetclose">Schließen</button>`);
 }
 
 /* Blätter */
@@ -768,7 +813,7 @@ function swapSheet(id,wd,pl,ctx){
 /* Training */
 function mkItem(it,pl){
   const e=EXM[it.id],step=stepFor(e,pl),sg=suggest(e,it,step);
-  return{id:e.id,name:e.name,t:e.t,rest:e.rest,step,w:sg.w,first:!!sg.first,note:sg.note||'',up:!!sg.up,sets:sg.v.map(v=>({v,p:v,w:sg.w,done:false}))};
+  return{id:e.id,name:e.name,t:e.t,rest:RR(e).rest,step,w:sg.w,first:!!sg.first,note:sg.note||'',up:!!sg.up,sets:sg.v.map(v=>({v,p:v,w:sg.w,done:false}))};
 }
 function startSession(wd,pl){
   const d=S.plan.days[wd];if(!d)return;const now=Date.now();
@@ -838,7 +883,7 @@ function importText(txt){
 }
 
 /* Bedienung */
-const ARM=['discard','delhist','bwdel'];
+const ARM=['discard','delhist','bwdel','pdel'];
 function padMove(ev){const p=document.getElementById('pad');if(!p)return;const r=p.getBoundingClientRect();const x=Math.max(-1,Math.min(1,(ev.clientX-r.left)/r.width*2-1)),y=Math.max(-1,Math.min(1,(ev.clientY-r.top)/r.height*2-1));
   S.setup.pad={x:r2(x),y:r2(y)};const k=document.getElementById('knob');k.style.left=(x+1)*50+'%';k.style.top=(y+1)*50+'%';padLabels()}
 document.addEventListener('pointerdown',ev=>{const p=ev.target.closest('#pad');if(!p)return;dragging=true;try{p.setPointerCapture(ev.pointerId)}catch(e){}padMove(ev)});
@@ -853,6 +898,24 @@ document.addEventListener('click',ev=>{
   switch(a){
     case'day':{const d=+b.dataset.d,c=S.setup.days[d];if(!c)S.setup.days[d]='g';else if(c==='g')S.setup.days[d]='h';else delete S.setup.days[d];genPlan();render();break}
     case'split':S.setup.split=v;genPlan();render();break;
+    case'goal':S.setup.goal=v;S.setup.pad=Object.assign({},GOALPAD[v]);genPlan();render();break;
+    case'focus':{const f=S.setup.focus=S.setup.focus||[],q=f.indexOf(v);q<0?f.push(v):f.splice(q,1);genPlan();render();break}
+    case'profiles':profSheet();break;
+    case'pswitch':if(id!==PR.active){hideRest();PR.active=id;savePR();S=loadProfile(id);ovWd=ovPl=backupText=null;pasteOpen=false;if(!S.onb&&(!S.plan||S.plan.ver!==5))genPlan();if(S.session){wake();if(S.session.rest)showRest()}closeSheet();tab='heute';render();toast(`Hallo ${me().name}`)}else closeSheet();break;
+    case'pnew':{const pid='p'+uid();PR.list.push({id:pid,name:'Neues Profil'});PR.active=pid;savePR();S=defaults();S.onb=true;OB=obDefaults();save();hideRest();closeSheet();tab='heute';render();window.scrollTo(0,0);break}
+    case'prename':{const t=document.getElementById('prn'),nm=t&&t.value.trim();if(nm){me().name=nm.slice(0,24);savePR();profSheet();render();toast('Umbenannt')}break}
+    case'pdel':if(was==='pdel'&&PR.list.length>1){const old=PR.active;try{localStorage.removeItem(dkey(old))}catch(e){}PR.list=PR.list.filter(p=>p.id!==old);PR.active=PR.list[0].id;savePR();S=loadProfile(PR.active);armed=null;hideRest();closeSheet();if(!S.plan||S.plan.ver!==5)genPlan();render();toast('Profil gelöscht')}else{armed='pdel';profSheet()}break;
+    case'obg':OB.goal=v;render();break;
+    case'obf':{const q=OB.focus.indexOf(v);q<0?OB.focus.push(v):OB.focus.splice(q,1);render();break}
+    case'obl':OB.lvl=+v;render();break;
+    case'obp':OB.pl=v;render();break;
+    case'obn':OB.n=+v;render();break;
+    case'obgo':{if(OB.name.trim()){me().name=OB.name.trim().slice(0,24);savePR()}
+      const D={2:[0,3],3:[0,2,4],4:[0,1,3,4],5:[0,1,2,4,5]}[OB.n];
+      S.setup=Object.assign(defaults().setup,{days:Object.fromEntries(D.map(d=>[d,OB.pl])),lvl:OB.lvl,goal:OB.goal,focus:OB.focus.slice(),pad:Object.assign({},GOALPAD[OB.goal])});
+      const b=num(OB.bw);if(b>=30&&b<=250)S.body=[{d:ymd(Date.now()),kg:r2(b)}];
+      delete S.onb;genPlan();tab='heute';render();window.scrollTo(0,0);toast('Dein Plan steht.');break}
+    case'obcancel':{const old=PR.active;try{localStorage.removeItem(dkey(old))}catch(e){}PR.list=PR.list.filter(p=>p.id!==old);PR.active=PR.list[0].id;savePR();S=loadProfile(PR.active);if(!S.plan||S.plan.ver!==5)genPlan();render();break}
     case'firstok':{const it=s.items[s.idx];if(!(it.w>0)){toast('Trag zuerst ein Gewicht ein.');break}it.first=false;it.sets.forEach(x=>{if(!x.done)x.w=it.w});save();render();break}
     case'dur':S.setup.dur=v==='auto'?'auto':+v;genPlan();render();break;
     case'lvl':S.setup.lvl=+v;genPlan();render();break;
@@ -892,6 +955,7 @@ document.addEventListener('click',ev=>{
   }
 });
 document.addEventListener('input',ev=>{const t=ev.target;
+  if(t.dataset.ob){OB[t.dataset.ob]=t.value;return}
   if(t.dataset.w&&S.session){S.session.items[S.session.idx].w=r2(Math.max(0,num(t.value)));save()}
   else if(t.dataset.set==='goalKg'){S.settings.goalKg=r2(Math.max(0,num(t.value)));save()}});
 document.addEventListener('change',ev=>{const t=ev.target;
