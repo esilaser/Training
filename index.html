@@ -808,6 +808,7 @@ function progressView(){
     <button class="link" data-act="pastetoggle">${pasteOpen?'Schließen':'Backup aus Text laden'}</button>
     ${pasteOpen?'<textarea class="field ta" id="pt" placeholder="Backup-Text hier einfügen" aria-label="Backup-Text"></textarea><button class="btn ghost wide" data-act="pasteload">Aus Text laden</button>':''}
     <input type="file" id="file" accept=".json,application/json,text/plain" hidden></section>`;
+  h+=`<section class="card"><h2>Neu starten</h2><p class="muted small">Löscht alle Trainings, Körpergewicht, Maße und Eiweiß-Einträge dieses Profils, auch in der Cloud. Der Zyklus beginnt wieder bei Woche 1. Plan, Einstellungen, Konto und Team bleiben.</p><button class="btn ghost wide" style="color:var(--red)" data-act="reset">${armed==='reset'?'Nochmal tippen: alles löschen':'Fortschritt zurücksetzen'}</button></section>`;
   return h;
 }
 function rel(t){const a=new Date(t),b=new Date();a.setHours(0,0,0,0);b.setHours(0,0,0,0);const n=Math.round((b-a)/DAY);return n<=0?'heute':n===1?'gestern':`vor ${n} Tagen`}
@@ -889,19 +890,20 @@ const fsPut=(p,o)=>fsReq(p,{method:'PATCH',body:JSON.stringify({fields:{json:{st
 async function fsList(p){const j=await fsReq(p+'?pageSize=300');return(j&&j.documents)||[]}
 const dj=d=>{try{return JSON.parse(d.fields.json.stringValue)}catch(e){return null}};
 function mergeBy(a,b,k){const m=new Map();(b||[]).forEach(x=>m.set(x[k],x));(a||[]).forEach(x=>m.set(x[k],x));return[...m.values()].sort((x,y)=>x[k]<y[k]?-1:1)}
-function mainData(){return{setup:S.setup,swaps:S.swaps,body:S.body,settings:S.settings,nut:S.nut,meas:S.meas,meso:S.meso,del:S.del,lastBackup:S.lastBackup,updated:S.updated||0,name:me().name}}
+function mainData(){return{setup:S.setup,swaps:S.swaps,body:S.body,settings:S.settings,nut:S.nut,meas:S.meas,meso:S.meso,del:S.del,resetAt:S.resetAt||0,lastBackup:S.lastBackup,updated:S.updated||0,name:me().name}}
 async function sync(){
   if(!FB()||!S.cloud||!S.cloud.rt||syncing||PREVIEW||!navigator.onLine)return;
   syncing=true;const pid=PR.active;
   try{
     const uid=S.cloud.uid,rm=await fsGet(`users/${uid}/data/main`),R=rm?dj(rm):null,hs=await fsList(`users/${uid}/hist`);
     if(PR.active!==pid)return;
+    const rr=(R&&R.resetAt)||0;if(rr>(S.resetAt||0)){S.resetAt=rr;S.history=S.history.filter(h=>h.start>=rr);S.body=[];S.meas=[];S.nut={};if(R.meso)S.meso=R.meso}
     const fresh=!S.history.length,del=new Set([...(S.del||[]),...((R&&R.del)||[])]),ids=new Set(S.history.map(h=>h.id));let planChange=false;
     S.del=[...del];S.history=S.history.filter(h=>!del.has(h.id));
-    hs.forEach(d=>(dj(d)||[]).forEach(h=>{if(!del.has(h.id)&&!ids.has(h.id)){S.history.push(h);ids.add(h.id)}}));
+    hs.forEach(d=>(dj(d)||[]).forEach(h=>{if(!del.has(h.id)&&!ids.has(h.id)&&h.start>=(S.resetAt||0)){S.history.push(h);ids.add(h.id)}}));
     if(R){
       if((R.updated||0)>(S.updated||0)||(fresh&&R.setup)){S.setup=Object.assign(defaults().setup,R.setup||{});S.swaps=R.swaps||{};S.settings=R.settings||S.settings;S.meso=R.meso||S.meso;S.updated=R.updated;planChange=true;if(R.name&&me().name!==R.name){me().name=R.name;savePR()}}
-      S.body=mergeBy(S.body,R.body,'d');S.meas=mergeBy(S.meas,R.meas,'d');const nu=Object.assign({},R.nut||{});for(const k in S.nut||{})nu[k]=Math.max(nu[k]||0,S.nut[k]);S.nut=nu;
+      if((S.resetAt||0)<=rr){S.body=mergeBy(S.body,R.body,'d');S.meas=mergeBy(S.meas,R.meas,'d');const nu=Object.assign({},R.nut||{});for(const k in S.nut||{})nu[k]=Math.max(nu[k]||0,S.nut[k]);S.nut=nu}
     }
     if(planChange&&!S.session)genPlan();else save();
     await fsPut(`users/${uid}/data/main`,mainData());
@@ -1055,7 +1057,7 @@ function importText(txt){
 }
 
 /* Bedienung */
-const ARM=['discard','delhist','bwdel','pdel','tmleave'];
+const ARM=['discard','delhist','bwdel','pdel','tmleave','reset'];
 function padMove(ev){const p=document.getElementById('pad');if(!p)return;const r=p.getBoundingClientRect();const x=Math.max(-1,Math.min(1,(ev.clientX-r.left)/r.width*2-1)),y=Math.max(-1,Math.min(1,(ev.clientY-r.top)/r.height*2-1));
   S.setup.pad={x:r2(x),y:r2(y)};const k=document.getElementById('knob');k.style.left=(x+1)*50+'%';k.style.top=(y+1)*50+'%';padLabels()}
 document.addEventListener('pointerdown',ev=>{const p=ev.target.closest('#pad');if(!p)return;dragging=true;try{p.setPointerCapture(ev.pointerId)}catch(e){}padMove(ev)});
@@ -1087,6 +1089,7 @@ document.addEventListener('click',ev=>{
     case'rateok':case'ratealt':{const id0=s&&s.rate;if(id0){if(a==='rateok'){S.setup.ok=S.setup.ok||{};S.setup.ok[id0]=1}else{S.setup.ban=S.setup.ban||[];if(!S.setup.ban.includes(id0))S.setup.ban.push(id0);toast('Kommt nicht mehr dran. Die App nimmt eine andere Übung für dieselben Muskeln.')}s.rate=null;touch();genPlan();save()}
       if(document.getElementById('rest').classList.contains('show'))showRest();else if(document.getElementById('sheet').classList.contains('show'))openFinish();break}
     case'unban':touch();S.setup.ban=(S.setup.ban||[]).filter(x=>x!==id);genPlan();render();break;
+    case'reset':if(was==='reset'){armed=null;hideRest();closeSheet();S.session=null;S.del=[...new Set([...(S.del||[]),...S.history.map(h=>h.id)])];S.history=[];S.body=[];S.meas=[];S.nut={};S.meso={start:monday(Date.now()).getTime()};S.resetAt=Date.now();S.lastBackup=null;sleep();genPlan();kick();render();window.scrollTo(0,0);toast('Fortschritt zurückgesetzt')}else{armed='reset';render()}break;
     case'split':touch();S.setup.split=v;genPlan();render();break;
     case'goal':touch();S.setup.goal=v;S.setup.pad=Object.assign({},GOALPAD[v]);genPlan();render();break;
     case'focus':{touch();const f=S.setup.focus=S.setup.focus||[],q=f.indexOf(v);q<0?f.push(v):f.splice(q,1);genPlan();render();break}
