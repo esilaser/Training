@@ -27,3 +27,39 @@ Neues Handy: App wie oben installieren, dann Fortschritt > Backup laden.
 WICHTIG
 Das Symbol auf dem Home-Bildschirm nicht löschen. Damit wären auch die
 Daten weg, außer du hast ein Backup.
+
+NEU IN DIESER VERSION
+Heute
+- Ringe zeigen das Wochenziel: Trainings, Sätze und Minuten.
+- Vor 12 Uhr fragt eine kleine Karte nach dem Gewicht. Eintippen (Komma
+  geht), Speichern, fertig. Mit dem X fragt sie heute nicht mehr.
+- Montags steht oben der Rückblick auf die letzte Woche: was gut lief,
+  welcher Muskel zu kurz kam und was die App für die neue Woche anpasst.
+- Fällt ein Training aus, rutscht es nach. Am Ruhetag danach kannst du es
+  nachholen, sonst kommt es beim nächsten Training dran.
+
+Training
+- "Training starten" fragt nach der Tagesform. Fit, Normal oder Müde
+  antippen startet sofort. Bei Müde gibt es einen Satz weniger und etwa
+  10 % weniger Gewicht.
+- Darüber kannst du die Zeit für heute wählen (45, 30 oder 20 min). Die
+  Grundübungen bleiben, der Rest läuft als Supersätze.
+- "Gerät besetzt" zieht eine Übung für dieselben Muskeln vor. Die besetzte
+  kommt danach dran.
+- Bei Maschinen und Kabeln: "Geräte-Einstellung merken" speichert Sitz,
+  Polster und eine Notiz. Beim nächsten Mal steht sie bei der Übung.
+- Nach jedem Satz gibt es "Satz rückgängig", in der Pause und im Training.
+- Lag ein Satz deutlich unter dem Ziel, wird die Pause automatisch länger.
+- Neue Bestwerte feiert die App direkt. Alle Rekorde stehen unter
+  Fortschritt.
+- Tipp auf die Balken oben öffnet die Übersicht. Dort kannst du Übungen
+  vorziehen und übersprungene nachholen.
+
+Fortschritt
+- Das Körperbild zeigt, welche Muskeln gut trainiert sind (grün) und welche
+  zu kurz kommen (gelb, orange, rot). Oben umschalten zwischen den letzten
+  7 Tagen und dem Plan. Tipp auf einen Muskel zeigt die Übungen dazu.
+- Der Zunahme-Coach unter Körpergewicht sagt, ob dein Tempo passt, und
+  gibt einen Tipp in kcal pro Tag.
+- Team einladen: "Einladen" oder "WhatsApp" verschickt einen Link. Wer
+  darauf tippt und angemeldet ist, ist direkt im Team.
