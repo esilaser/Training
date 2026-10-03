@@ -130,10 +130,9 @@ div.cell:active{background:transparent}
 .seg{position:relative;display:flex;background:var(--fill3);border-radius:999px;padding:3px;margin:14px 0 4px;isolation:isolate}
 .seg>i{position:absolute;z-index:-1;top:3px;bottom:3px;left:3px;width:calc((100% - 6px)/var(--n));transform:translateX(calc(100% * var(--i)));border-radius:999px;background:var(--segsel);box-shadow:0 3px 8px rgba(0,0,0,.12),0 3px 1px rgba(0,0,0,.04);transition:transform .5s var(--spring)}
 .list .seg,.card .seg{background:var(--fill3)}
-.seg button{flex:1;min-width:0;border:0;background:none;border-radius:999px;padding:6px 4px;min-height:38px;font:500 15px/20px var(--font);color:var(--label);white-space:nowrap;transition:transform .3s var(--spring)}
+.seg button{flex:1;min-width:0;border:0;background:none;border-radius:999px;padding:6px 4px;min-height:44px;font:500 15px/20px var(--font);color:var(--label);white-space:nowrap;transition:transform .3s var(--spring)}
 .seg button[aria-pressed="true"]{font-weight:600}
 .seg button:active{transform:scale(.95)}
-.seg.lg button{min-height:44px}
 
 /* Knöpfe */
 .btn{display:inline-flex;align-items:center;justify-content:center;gap:8px;font:600 17px/22px var(--font);border:0;border-radius:999px;padding:12px 20px;min-height:50px;transition:transform .45s var(--spring),opacity .2s,background-color .2s}
@@ -186,7 +185,7 @@ div.cell:active{background:transparent}
 .meta .i{width:17px;height:17px}
 .xrow{gap:12px;padding:8px 14px 8px 12px;min-height:60px}
 .list .xrow{--sx:88px}
-.th{width:64px;height:48px;background:var(--card2);border-radius:12px;flex:none}
+.fig.th{width:64px;height:48px;background:var(--card2);border-radius:12px;flex:none}
 .bar{display:block;height:8px;border-radius:4px;background:var(--fill3);overflow:hidden;margin-top:8px}
 .bar b{display:block;height:100%;border-radius:4px;background:var(--c,var(--tint));transition:width .8s var(--spring)}
 .bmap{display:flex;justify-content:center;gap:8px;margin:2px 0 0}
@@ -202,7 +201,9 @@ div.cell:active{background:transparent}
 .mrow .ct .bar{margin-top:6px;height:6px}
 .msum{font-size:15px;line-height:20px;margin-top:12px;text-align:center;color:var(--label2)}
 .stats .dot{width:8px;height:8px;margin-right:4px}
-.wx{margin:-12px -12px -12px auto;width:44px;height:44px;border:0;background:none;color:var(--label3);display:grid;place-items:center;padding:0;flex:none}
+.weigh{position:relative}
+.weigh .ch{padding-right:30px}
+.wx{position:absolute;top:4px;right:4px;width:44px;height:44px;border:0;background:none;color:var(--label3);display:grid;place-items:center;padding:0;flex:none}
 .wx .i{width:15px;height:15px;stroke-width:2.6}
 .weigh .inrow{margin-top:8px}
 .undo{display:flex;align-items:center;justify-content:center;gap:6px;margin:0 auto 12px;min-height:44px;padding:8px 18px;border:0;border-radius:999px;background:var(--fill3);color:var(--tint);font:600 15px/20px var(--font);animation:enter .4s var(--spring) both}
@@ -218,7 +219,7 @@ div.cell:active{background:transparent}
 .gearrow small{font:500 13px var(--font)}
 .gearrow .i{width:20px;height:20px}
 label.cell:active{background:transparent}
-.field.sm2{width:140px;min-height:40px;text-align:right;padding:8px 12px}
+.field.sm2{width:140px;min-height:44px;text-align:right;padding:8px 12px}
 .coach{display:flex;gap:10px;align-items:flex-start;background:var(--card2);border-radius:14px;padding:12px;margin-top:12px;font-size:15px;line-height:20px}
 .coach .i{color:var(--c);width:20px;height:20px;margin-top:1px}
 .rvl p{margin-top:10px;font-size:15px;line-height:20px;color:var(--label2)}
@@ -248,7 +249,8 @@ label.cell:active{background:transparent}
 .fig.big{max-width:320px;margin:0 auto 14px;background:var(--scard);border-radius:22px}
 
 /* Plan */
-.days{display:grid;grid-template-columns:repeat(7,1fr);gap:6px}
+.days{display:grid;grid-template-columns:repeat(7,1fr);gap:4px}
+.daysc{padding:10px 8px}
 .days button{border:0;background:var(--fill3);color:var(--label);border-radius:14px;min-height:60px;padding:6px 0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font:600 15px/20px var(--font);transition:transform .45s var(--spring),background-color .25s,color .25s}
 .days button:active{transform:scale(.92);transition-duration:.12s}
 .days button small{font-size:11px;line-height:13px;font-weight:500;color:var(--label2)}
@@ -281,11 +283,10 @@ label.cell:active{background:transparent}
 .x{width:44px;height:44px;border-radius:50%;border:0;background:var(--fill3);color:var(--label2);flex:none;display:grid;place-items:center;padding:0;transition:transform .45s var(--spring)}
 .x:active{transform:scale(.9);transition-duration:.12s}
 .x .i{width:18px;height:18px;stroke-width:2.6}
-.dots{display:flex;gap:4px;flex:1;align-items:center}
-.dots button{flex:1;height:22px;border:0;padding:0;background:none;min-width:6px;position:relative}
-.dots button::after{content:'';position:absolute;left:0;right:0;top:8px;height:6px;border-radius:3px;background:var(--fill);transition:background-color .4s}
-.dots .d::after{background:var(--green)}
-.dots .c::after{background:var(--tint)}
+.dots{display:flex;gap:4px;flex:1;align-items:center;height:44px;border:0;padding:0;background:none;min-width:0}
+.dots i{flex:1;height:6px;border-radius:3px;background:var(--fill);min-width:3px;transition:background-color .4s}
+.dots i.d{background:var(--green)}
+.dots i.c{background:var(--tint)}
 .el{font-size:17px;color:var(--label2);flex:none;min-width:44px;text-align:right}
 .stage{background:var(--card);border-radius:24px;margin-bottom:16px;padding:4px;overflow:hidden}
 .stage .fig{height:min(32vh,260px)}
@@ -765,8 +766,9 @@ function fig(id,ms){
 const animOf=(id,pl)=>id==='warm'?(pl==='h'?'hampelmann':'crosstrainer'):id;
 const figEl=(id,cls,anim)=>`<svg class="fig ${cls||''}" viewBox="0 0 200 150" aria-hidden="true" ${anim?'data-anim':'data-thumb'}="${id}"></svg>`;
 let animEls=[];
-function hydrate(){document.querySelectorAll('[data-thumb]').forEach(el=>{if(!el.dataset.ok){el.innerHTML=fig(el.dataset.thumb,null);el.dataset.ok=1}});animEls=[...document.querySelectorAll('[data-anim]')]}
-(function loop(ts){animEls.forEach(el=>{if(el.isConnected)el.innerHTML=fig(el.dataset.anim,ts)});requestAnimationFrame(loop)})(0);
+const FIGC=new Map();
+function hydrate(){document.querySelectorAll('[data-thumb]').forEach(el=>{if(!el.dataset.ok){const id=el.dataset.thumb;if(!FIGC.has(id))FIGC.set(id,fig(id,null));el.innerHTML=FIGC.get(id);el.dataset.ok=1}});animEls=[...document.querySelectorAll('[data-anim]')]}
+(function loop(ts){if(animEls.length){const rs=document.getElementById('rest');if(!rs||!rs.classList.contains('show'))animEls.forEach(el=>{if(el.isConnected)el.innerHTML=fig(el.dataset.anim,ts)})}requestAnimationFrame(loop)})(0);
 
 /* Zustand */
 function defaults(){return{v:4,setup:{days:{0:'g',2:'g',4:'g'},pad:{x:0,y:.1},dur:'auto',lvl:1,split:'auto',goal:'muskel',focus:[],ss:false,mach:true,ban:[],ok:{}},plan:null,swaps:{},history:[],session:null,body:[],settings:{goalKg:0},lastBackup:null,nut:{},meas:[],del:[],meso:null,cloud:null,updated:0,gear:{},ui:{},review:null,boost:null,carry:null}}
@@ -798,7 +800,8 @@ function save(){try{localStorage.setItem(dkey(PR.active),JSON.stringify(S))}catc
 const me=()=>PR.list.find(p=>p.id===PR.active)||PR.list[0];
 let tab='heute',armed=null,ovWd=null,ovPl=null,showAll=false,backupText=null,pasteOpen=false,dragging=false;
 const openHist=new Set(),app=document.getElementById('app'),navEl=document.getElementById('nav'),navT=document.getElementById('navt');
-const H=()=>[...S.history].sort((a,b)=>a.start-b.start);
+let HS=null,HN=-1,HC=[];
+const H=()=>{if(HS!==S.history||HN!==S.history.length){HS=S.history;HN=S.history.length;HC=[...S.history].sort((a,b)=>a.start-b.start)}return HC};
 /* Ton, Bildschirm, Speicher */
 let ac=null;
 function unlockAudio(){try{if(!ac){const A=window.AudioContext||window.webkitAudioContext;if(A)ac=new A()}if(ac&&ac.state==='suspended')ac.resume()}catch(e){}}
@@ -1044,12 +1047,13 @@ function reviewCard(){
 /* Rekorde: bester Wert pro Übung (Gewicht als geschätztes Maximum, sonst Wiederholungen oder Zeit) */
 const setVal=(t,x)=>t==='t'?x.v:x.w>0?e1(x.w,x.v):x.v;
 const setTxt=(t,x)=>t==='t'?(x.v>=300?Math.round(x.v/60)+' min':x.v+' s'):x.w>0?`${kg(x.w)} kg × ${x.v}`:`${x.v} Wdh.`;
+let PRC=null;
 function prList(){
-  const best=new Map(),ev=[];
-  H().forEach(h=>h.items.forEach(it=>{if(!it.sets.length)return;const k=it.id||it.name,top=it.sets.reduce((a,x)=>setVal(it.t,x)>setVal(it.t,a)?x:a),v=setVal(it.t,top),b=best.get(k);
+  const HH=H();if(PRC&&PRC.h===HH)return PRC.r;const best=new Map(),ev=[];
+  HH.forEach(h=>h.items.forEach(it=>{if(!it.sets.length)return;const k=it.id||it.name,top=it.sets.reduce((a,x)=>setVal(it.t,x)>setVal(it.t,a)?x:a),v=setVal(it.t,top),b=best.get(k);
     if(b&&v>b.v*1.0001)ev.push({k,name:it.name,at:h.start,txt:setTxt(it.t,top)});
     if(!b||v>b.v*1.0001)best.set(k,{v,at:h.start,name:it.name,txt:setTxt(it.t,top),imp:!!b})}));
-  return{best,ev};
+  PRC={h:HH,r:{best,ev}};return PRC.r;
 }
 function splitRec(){
   const n=Object.keys(S.setup.days).length,s=S.setup.split,t=(S.plan.types||[]).map(x=>DT[x][0]).join(', ');
@@ -1062,7 +1066,7 @@ function splitRec(){
 function planView(){
   const P=S.setup,dl={g:'Gym',h:'Home'},c=cyc();
   const sci=[['Sätze pro Woche','Mehr Sätze bringen mehr Wachstum, mit abnehmendem Zusatznutzen. Du startest bei etwa 10 Sätzen pro großem Muskel.'],['Aufteilung','Ob Ganzkörper oder Split ist bei gleicher Satzzahl fast egal. Entscheidend sind die Sätze pro Woche.'],['Anstrengung','Hör 1 bis 2 Wiederholungen vor dem Muskelversagen auf. Das bringt fast das gleiche Wachstum mit weniger Erschöpfung.'],['Pausen','Mindestens 90 Sekunden, bei schweren Grundübungen 2 Minuten.'],['Übungen','Übungen in der Dehnung werden bevorzugt, zum Beispiel Beinbeuger sitzend, Trizeps über Kopf und Wadenheben stehend.'],['Steigerung','Schaffst du alle Sätze am oberen Ende, gibt es mehr Gewicht. Machst du eine Übung 2 Mal pro Woche, erst nach zwei Einheiten in Folge.']];
-  return lth('Plan')+`<h3 class="lh">Trainingstage</h3><div class="card"><div class="days">${WD.map((d,i)=>{const v=P.days[i];return`<button data-act="day" data-d="${i}" class="${v||''}" aria-label="${WDL[i]}: ${v?dl[v]:'frei'}">${d}<small>${v?dl[v]:'frei'}</small></button>`}).join('')}</div></div><p class="lf">Antippen wechselt zwischen Gym, Zuhause und frei.</p>
+  return lth('Plan')+`<h3 class="lh">Trainingstage</h3><div class="card daysc"><div class="days">${WD.map((d,i)=>{const v=P.days[i];return`<button data-act="day" data-d="${i}" class="${v||''}" aria-label="${WDL[i]}: ${v?dl[v]:'frei'}">${d}<small>${v?dl[v]:'frei'}</small></button>`}).join('')}</div></div><p class="lf">Antippen wechselt zwischen Gym, Zuhause und frei.</p>
   <h3 class="lh">Ziel</h3><div class="list">${GOALS.map(([v,l])=>chk('goal',v,P.goal===v,l)).join('')}</div><p class="lf">${GOALTXT[P.goal]||''}</p>
   <h3 class="lh">Extra-Fokus</h3><div class="card"><div class="chips">${FOCI.map(([v,l])=>`<button class="chip" data-act="focus" data-v="${v}" aria-pressed="${(P.focus||[]).includes(v)}">${l}</button>`).join('')}</div></div><p class="lf">Optional. Diese Muskeln bekommen etwa 50 % mehr Sätze.</p>
   <h3 class="lh">Aufteilung</h3><div class="list">${[['auto','Automatisch'],['gk','Ganzkörper'],['ou','Oberkörper / Unterkörper'],['ppl','Push / Pull / Beine'],['bro','Einzelne Muskeln']].map(([v,l])=>chk('split',v,P.split===v,l)).join('')}</div><p class="lf">${esc(splitRec())}</p>
@@ -1082,7 +1086,7 @@ function wRow(it){return`<div class="ctl"><span>Gewicht</span><button class="ste
 let popSet=null;
 function focusView(){
   const s=S.session,it=s.items[s.idx],j=it.sets.findIndex(x=>!x.done),st=it.sets[Math.max(0,j)],e=EXM[it.id],run=s.run&&s.run.i===s.idx,pj=popSet&&popSet.i===s.idx?popSet.j:-1;popSet=null;
-  let h=`<div class="ftop"><button class="x" data-act="end" aria-label="Training beenden">${ic('x')}</button><div class="dots">${s.items.map((q,i)=>{const dn=q.skip||q.sets.every(x=>x.done);return`<button class="${i===s.idx?'c':dn?'d':''}" data-act="jump" data-i="${i}" ${dn?'disabled':''} aria-label="${esc(q.name)}"></button>`}).join('')}</div><span class="num el" id="elapsed">0:00</span></div>${undoSnap?`<button class="undo" data-act="undo">${ic('reset')}Letzten Satz rückgängig</button>`:''}
+  let h=`<div class="ftop"><button class="x" data-act="end" aria-label="Training beenden">${ic('x')}</button><button class="dots" data-act="overview" aria-label="Übersicht: Übung ${s.idx+1} von ${s.items.length}">${s.items.map((q,i)=>{const dn=q.skip||q.sets.every(x=>x.done);return`<i class="${i===s.idx?'c':dn&&!q.skip?'d':''}"></i>`}).join('')}</button><span class="num el" id="elapsed">0:00</span></div>${undoSnap?`<button class="undo" data-act="undo">${ic('reset')}Letzten Satz rückgängig</button>`:''}
   <div class="stage">${figEl(animOf(it.id,s.pl),'',1)}</div>
   <h1 class="fname">${esc(it.name)}</h1><p class="cue">${esc(e.cue)}</p>${it.ss?`<p class="note up">Supersatz mit ${esc((s.items.find((q,k)=>k!==s.idx&&q.ss===it.ss)||{}).name||'')}</p>`:''}${it.note?`<p class="note${it.up?' up':''}">${esc(it.note)}</p>`:''}`;
   const tl=[];if(it.id!=='warm'){tl.push(`<button data-act="swaplist" data-id="${it.id}" data-ctx="s" data-pl="${s.pl}">${ic('swap')}Tauschen</button>`);if(s.pl==='g')tl.push(`<button data-act="busy">${ic('clock')}Gerät besetzt</button>`)}tl.push(`<button data-act="skip">${ic('skip')}Überspringen</button>`);
@@ -1522,6 +1526,10 @@ function busy(){
   if(it.sets.some(x=>x.done)){it.sets=it.sets.filter(x=>x.done);s.items.splice(i+1,0,nw);s.idx=i+1}else s.items[i]=nw;
   s.run=null;save();render();window.scrollTo(0,0);toast(`Stattdessen ${alt.name} für dieselben Muskeln.`);
 }
+function overviewSheet(){
+  const s=S.session;openSheet(`<h3>Übersicht</h3><div class="list ic">${s.items.map((q,i)=>{const n=q.sets.filter(x=>x.done).length,dn=!q.skip&&q.sets.every(x=>x.done),st=i===s.idx?'Jetzt dran':q.skip?'Übersprungen, tippen zum Nachholen':dn?'Erledigt':`${n} von ${q.sets.length} Sätzen`;
+    return`<button class="cell" data-act="jump" data-i="${i}" ${dn&&i!==s.idx?'disabled':''}><span class="ico" style="--c:${dn?'var(--green)':i===s.idx?'var(--tint)':q.skip?'var(--orange)':'var(--gray)'}">${ic(dn?'check':q.skip?'skip':'dumbbell')}</span><span class="ct"><b>${esc(q.name)}</b><small>${st}${q.ss?', im Supersatz':''}</small></span></button>`}).join('')}</div><p class="lf">Tippe auf eine Übung, um sie jetzt zu machen.</p>`);
+}
 function gearTxt(id){const g=(S.gear||{})[id];return g?[g.sitz&&'Sitz '+g.sitz,g.polster&&'Polster '+g.polster,g.notiz].filter(Boolean).join(', '):''}
 function gearSheet(id){
   const e=EXM[id],g=(S.gear||{})[id]||{},f=(k,l,v,ph)=>`<label class="cell"><span class="ct"><b>${l}</b></span><input class="field sm2" id="${k}" value="${esc(v||'')}" placeholder="${ph}" autocomplete="off" maxlength="24"></label>`;
@@ -1675,7 +1683,8 @@ function act(b){
     case'tgo':{const st=s.items[s.idx].sets.find(x=>!x.done);if(st){s.run={i:s.idx,endAt:Date.now()+st.v*1000,total:st.v};save();render()}break}
     case'tstop':if(s.run){const el=Math.max(1,Math.round(s.run.total-(s.run.endAt-Date.now())/1000));completeSet(Math.min(el,s.run.total))}break;
     case'skip':{s.items[s.idx].skip=true;s.run=null;const nx=nextIdx(s);if(nx<0){save();openFinish()}else{s.idx=nx;save();render()}break}
-    case'jump':s.idx=+b.dataset.i;s.run=null;save();render();break;
+    case'overview':overviewSheet();break;
+    case'jump':{const i=+b.dataset.i;if(s.items[i]){s.items[i].skip=false;s.idx=i;s.run=null}closeSheet();save();render();window.scrollTo(0,0);break}
     case'end':openFinish();break;
     case'finish':{const ok=finalize(false);kick();tab='heute';window.scrollTo(0,0);render('enter');toast(ok?'Gespeichert, stark gemacht!':'Training beendet.');break}
     case'discard':if(was==='discard'){armed=null;undoSnap=null;hideRest();closeSheet();S.session=null;save();sleep();render()}else{armed='discard';openFinish()}break;
