@@ -1,5 +1,5 @@
 // Offline-Cache: startet sofort aus dem Speicher und holt Updates im Hintergrund.
-const CACHE = 'training-v7';
+const CACHE = 'training-v8';
 const FILES = ['./', './index.html', './manifest.json', './icon-180.png', './icon-192.png', './icon-512.png'];
 
 self.addEventListener('install', e => {
