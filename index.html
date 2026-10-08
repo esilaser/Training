@@ -1570,10 +1570,12 @@ function celebrate(it){
 function busy(){
   const s=S.session,i=s.idx,it=s.items[i],e=EXM[it.id],pend=k=>k!==i&&!s.items[k].skip&&s.items[k].sets.some(x=>!x.done);
   if(it.ss)s.items.forEach(q=>{if(q.ss===it.ss)delete q.ss});
-  const later=s.items.map((q,k)=>k).filter(pend),same=later.find(k=>k>i&&EXM[s.items[k].id].g===e.g)??later.find(k=>EXM[s.items[k].id].g===e.g);
+  // Im Park: nur Übungen vorziehen, die nicht auch das besetzte Gerät brauchen
+  const pk=S.setup.park||[],eqs=id=>s.pl==='c'?(PEQ[id]||[]).filter(k=>pk.includes(k)):[],taken=eqs(it.id),freeId=id=>{const r=eqs(id);return!taken.length||!r.length||r.some(k=>!taken.includes(k))};
+  const all=s.items.map((q,k)=>k).filter(pend),fr=all.filter(k=>freeId(s.items[k].id)),fk=fr.filter(k=>EXM[s.items[k].id].g!=='ca'),later=fk.length?fk:fr.length?fr:all,same=later.find(k=>k>i&&EXM[s.items[k].id].g===e.g)??later.find(k=>EXM[s.items[k].id].g===e.g);
   if(same!=null){const q=s.items[same];s.items[same]=it;s.items[i]=q;s.run=null;save();render();window.scrollTo(0,0);toast(`Jetzt ${q.name}. ${it.name} kommt später dran.`);return}
   if(later.length){const nx=s.items[later.find(k=>k>i)??later[0]];s.items.splice(i,1);s.items.splice(s.items.indexOf(nx)+1,0,it);s.idx=s.items.indexOf(nx);s.run=null;save();render();window.scrollTo(0,0);toast(`Erst ${nx.name}, danach ${it.name}.`);return}
-  const cur=new Set(s.items.map(q=>q.id)),cand=EX.filter(x=>x.g===e.g&&avail(x,s.pl)&&!cur.has(x.id)&&!(S.setup.ban||[]).includes(x.id)).sort((a,b)=>(eqOf(a)===eqOf(e))-(eqOf(b)===eqOf(e))||(a.c===e.c?0:1)-(b.c===e.c?0:1)||a.i-b.i),alt=cand[0];
+  const cur=new Set(s.items.map(q=>q.id)),cand=EX.filter(x=>x.g===e.g&&avail(x,s.pl)&&freeId(x.id)&&!cur.has(x.id)&&!(S.setup.ban||[]).includes(x.id)).sort((a,b)=>(eqOf(a)===eqOf(e))-(eqOf(b)===eqOf(e))||(a.c===e.c?0:1)-(b.c===e.c?0:1)||a.i-b.i),alt=cand[0];
   if(!alt){toast('Keine Alternative da. Warte kurz oder überspring die Übung.');return}
   const left=it.sets.filter(x=>!x.done).length,nw=mkItem({id:alt.id,sets:left},s.pl);
   if(it.sets.some(x=>x.done)){it.sets=it.sets.filter(x=>x.done);s.items.splice(i+1,0,nw);s.idx=i+1}else s.items[i]=nw;
