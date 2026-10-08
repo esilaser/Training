@@ -68,6 +68,11 @@ Calisthenics-Park
   Hangelleiter). Die App stellt die Übungen danach zusammen.
 - Ist ein Gerät besetzt, zum Beispiel die Klimmzugstange: "Gerät besetzt"
   tippen. Die Übung kommt später im Training dran.
+- Im Park gibt es bis zu 77 Übungen, je nach Geräten und Erfahrung, zum
+  Beispiel Klimmzüge im Untergriff, Hangeln, L-Sitz, Füße zur Stange,
+  Ring-Liegestütze, Pistol Squat zur Bank und Negative Dips.
+- Im Park und zu Hause wechseln gleichwertige Übungen jede Woche. Im Gym
+  bleiben die Übungen gleich, damit die Steigerung gut messbar ist.
 
 Ende des Trainings
 - Nach dem letzten Satz fragt die App, ob du noch etwas dranhängen
