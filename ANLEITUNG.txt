@@ -55,6 +55,32 @@ Training
 - Tipp auf die Balken oben öffnet die Übersicht. Dort kannst du Übungen
   vorziehen und übersprungene nachholen.
 
+Muskeln
+- Bei jeder Übung steht, welcher Muskel trainiert wird: in den Listen,
+  im Training und im Übungsblatt. Das kleine Körperbild zeigt den
+  Hauptmuskel kräftig und die Nebenmuskeln heller.
+
+Calisthenics-Park
+- Unter Plan bei den Trainingstagen einen Tag mehrmals antippen:
+  Gym, Zuhause, Park, frei. Oder unter Heute oben "Park" wählen.
+- Unter "Geräte im Park" alle Geräte anschalten, die es dort gibt
+  (Klimmzugstange, Barren, Reck, Ringe, Bank, Sprossenwand,
+  Hangelleiter). Die App stellt die Übungen danach zusammen.
+- Ist ein Gerät besetzt, zum Beispiel die Klimmzugstange: "Gerät besetzt"
+  tippen. Die Übung kommt später im Training dran.
+
+Ende des Trainings
+- Nach dem letzten Satz fragt die App, ob du noch etwas dranhängen
+  willst. Übersprungenes steht oben, darunter Vorschläge für Muskeln,
+  die diese Woche zu kurz kamen. Antippen und weiter geht es. Unter
+  "Andere Übung wählen" gibt es alle Übungen.
+
+Zyklus
+- Trainierst du in einer Woche zu wenig (weniger als 2 Trainings, bei 4
+  oder mehr geplanten Tagen weniger als die Hälfte), geht der Zyklus eine
+  Woche zurück, zum Beispiel von Woche 5 auf Woche 4, höchstens bis
+  Woche 1. Die Entlastungswoche wird nicht zurückgestuft.
+
 Fortschritt
 - Das Körperbild zeigt, welche Muskeln gut trainiert sind (grün) und welche
   zu kurz kommen (gelb, orange, rot). Oben umschalten zwischen den letzten
