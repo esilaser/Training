@@ -1025,9 +1025,9 @@ function weekItems(wd,pl){
   if(active)(w.add[wd]||[]).forEach(it=>{const old=L.find(x=>x.id===it.id);if(old){old.sets+=it.sets;old.from=it.from}else L.push({...it})});
   return adaptItems(L,pl);
 }
-function dayItems(wd,pl){
+function dayItems(wd,pl,adjust=true){
   const L=weekItems(wd,pl),w=S.wk,gs=w&&w.wk===ymd(monday(Date.now()))&&Array.isArray(w.sore[wd])?w.sore[wd]:[];
-  return L.filter(it=>!gs.includes(EXM[it.id].g)).map(it=>{const sec=EXM[it.id].sec.filter(g=>gs.includes(g));if(sec.length){it.sets=Math.max(1,it.sets-1);it.note=`Leichter wegen Muskelkater im Bereich ${sec.map(g=>GR[g]).join(' und ')}. Ein Satz weniger.`}return it});
+  return L.filter(it=>!gs.includes(EXM[it.id].g)).map(it=>{const sec=EXM[it.id].sec.filter(g=>gs.includes(g));if(sec.length){it.sets=Math.max(1,it.sets-1);it.note=`Leichter wegen Muskelkater im Bereich ${sec.map(g=>GR[g]).join(' und ')}. Ein Satz weniger.`}return adjust?recoverItem(it):it});
 }
 function soreWeek(){const wk=ymd(monday(Date.now()));if(!S.wk||S.wk.wk!==wk)S.wk={wk,sore:{},add:{},drop:{},route:{},order:[],msg:{},omit:[]};return S.wk}
 function rebuildSore(){
@@ -1064,13 +1064,39 @@ function applySore(gs){
   if(!w.order.includes(+wd))w.order.push(+wd);if(!(wd in w.route))w.route[wd]=next??null;w.sore[wd]=gs.filter(g=>GR[g]);rebuildSore();save();closeSheet();render();if(back)startSheet(wd,pl);SO=null;
 }
 const nextWd=from=>{for(let i=1;i<=7;i++){const d=(from+i)%7;if(S.plan.days[d])return d}return null};
+/* Erholung: harte Sätze zählen am Hauptmuskel ganz, am Nebenmuskel halb. */
+function recovery(now=Date.now()){
+  const out=Object.fromEntries(GORD.map(g=>[g,{last:0,hard:0,sets:0,hours:Infinity,hardHours:Infinity,status:0}]));
+  H().forEach(h=>{const at=h.end||h.start;if(at>now)return;const v=volOf(h.items.map(it=>[it.id,0,it.sets.filter(x=>x.done!==false&&x.v>0).length])).v;
+    GORD.forEach(g=>{const q=out[g];if(v[g]>0&&at>q.last){q.last=at;q.sets=v[g]}if(v[g]>=6&&h.form!=='muede'&&!h.dl&&at>q.hard)q.hard=at})});
+  GORD.forEach(g=>{const q=out[g];q.hours=q.last?(now-q.last)/3600e3:Infinity;q.hardHours=q.hard?(now-q.hard)/3600e3:Infinity;q.status=q.hardHours<24?3:q.hours<48?1:0});return out;
+}
+function recoverItem(it){const e=EXM[it.id],r=recovery()[e.g];if(r&&r.hardHours<48&&it.sets>2){it.sets--;it.note=[it.note,`Zuletzt viel ${GR[e.g]} vor ${Math.floor(r.hardHours)} Stunden, heute ein Satz weniger.`].filter(Boolean).join(' ')}return it}
+const MOVES=[['brustpresse','bankdruecken','kh_bankdruecken','schraegbank_kh','schraegbank_lh','schraeg_brustpresse'],['rudern_kabel','rudern_maschine','kh_rudern','langhantelrudern','tbar_rudern','rudern_brustgestuetzt','kabelrudern_einarmig'],['latzug','latzug_eng'],['schulterdruecken_kh','schulterpresse'],['curls','kabel_curls','bizeps_maschine','scott_curls','kabel_curls_hinten'],['trizeps_kabel','trizeps_kickback_kabel'],['trizeps_ueberkopf','trizeps_ueberkopf_kabel','french_press'],['beinbeuger','beinbeuger_liegend'],['hipthrust','hipthrust_maschine'],['wadenheben','wadenmaschine_stehend','wadenmaschine_sitzend']];
+function startEstimate(e){
+  if(!(e.step>0))return null;const group=MOVES.find(L=>L.includes(e.id));if(!group)return null;
+  const unit=x=>['kabelrudern_einarmig','kabel_curls_hinten','trizeps_kickback_kabel'].includes(x.id)?.25:({b:1,d:.4,m:.9,k:.5}[eqOf(x)]||1),incl=x=>x.id.includes('schraeg');
+  const out=[];H().slice().reverse().forEach(h=>{if(h.dl||h.form==='muede')return;h.items.forEach(it=>{const src=EXM[it.id];if(!src||src.id===e.id||!group.includes(src.id)||src.g!==e.g||!(src.step>0))return;
+    const sets=it.sets.filter(x=>x.w>0&&x.v>0&&x.done!==false);if(!sets.length)return;
+    const mx=Math.max(...sets.map(x=>e1(x.w,x.v))),f=unit(e)/unit(src)*(incl(e)&&!incl(src)?.85:1),w=Math.floor(mx*f/(1+(RR(e).lo+4)/30)*.9/e.step)*e.step;
+    if(w>0)out.push({w:Math.max(e.step,w),name:src.name,rank:Number(eqOf(src)!==eqOf(e))+Number(incl(e)!==incl(src))})})});
+  out.sort((a,b)=>a.rank-b.rank);return out[0]||null;
+}
+function rirHistory(id){return H().slice().reverse().filter(h=>!h.dl&&h.form!=='muede').map(h=>h.items.find(it=>it.id===id&&it.sets.length)).filter(Boolean).slice(0,2)}
+function rirBlock(){const s=S.session,it=s&&s.items.find(q=>q.id===s.rirAsk);if(!it||it.rir!=null)return'';return`<div class="card" style="margin:14px 0"><p class="small"><b>${esc(it.name)}: Wie viel war noch drin?</b></p><div class="chips" style="margin-top:8px">${[[3,'Noch 3+ drin'],[1,'1 bis 2 drin'],[0,'Am Limit']].map(([v,l])=>`<button class="chip" data-act="rir" data-id="${it.id}" data-v="${v}">${l}</button>`).join('')}</div><p class="muted small">Freiwillig. Du kannst direkt weitertrainieren.</p></div>`}
+function warmBlock(it){
+  const s=S.session,e=EXM[it.id];if(s.pl!=='g'||!e.c||it.w<20||!(it.step>0)||s.warmupDone||it.sets.some(x=>x.done))return'';
+  if(!it.warm){it.warm=[{p:.5,r:8},{p:.7,r:4},{p:.85,r:2}];save()}
+  const min=eqOf(e)==='b'?(S.settings.barKg||20):it.step;
+  return`<section class="card" style="margin:14px 0"><h3>Aufwärmsätze</h3><p class="muted small">Vor der ersten schweren Grundübung. Zählt nicht zum Wochenziel oder zu Rekorden.${eqOf(e)==='b'?' Mindestens die leere Stange.':''}</p><div class="list" style="margin-top:8px">${it.warm.map((q,i)=>`<button class="cell" data-act="warmdone" data-i="${i}" aria-pressed="${!!q.done}"><span class="ct"><b>${kg(Math.max(min,Math.round(it.w*q.p/it.step)*it.step))} kg × ${q.r}</b><small>${Math.round(q.p*100)} % des Arbeitsgewichts</small></span>${q.done?ic('check','ck'):''}</button>`).join('')}</div><button class="link center" data-act="warmskip">Aufwärmsätze überspringen</button></section>`;
+}
 /* Steigerung: geschätztes Maximum (Epley), 1 bis 2 Wiederholungen im Tank, Häufigkeit pro Woche */
 const e1=(w,r)=>w*(1+r/30);
 function sessionsFor(id,name){const L=H(),out=[];for(let k=L.length-1;k>=0&&out.length<4;k--){const x=!L[k].dl&&L[k].form!=='muede'&&L[k].items.find(y=>y.id===id||y.name===name);if(x&&x.sets.length)out.push(x.sets)}return out}
 const lastFor=(id,name)=>sessionsFor(id,name)[0]||null;
 function freqOf(id){let n=0;if(S.plan)for(const d in S.plan.days)if(S.plan.days[d].items.some(i=>i.id===id))n++;return Math.max(1,n)}
 function bw(){const B=[...S.body].sort((a,b)=>a.d<b.d?-1:1);return B.length?B[B.length-1].kg:0}
-function startW(e){const b=bw(),x=e.sw*(b?b/70:1);return e.step>0?Math.max(e.step,Math.round(x/e.step)*e.step):0}
+function startW(e){const rel=startEstimate(e);if(rel)return rel.w;const b=bw(),x=e.sw*(b?b/70:1);return e.step>0?Math.max(e.step,Math.round(x/e.step)*e.step):0}
 const stepFor=(e,pl)=>pl!=='g'||e.pl==='h'||e.pl==='c'?0:e.step;
 function suggest(e,it,step){
   const n=it.sets||3,{lo,hi}=RR(e),P=sessionsFor(e.id,e.name),L=P[0];
@@ -1080,10 +1106,12 @@ function suggest(e,it,step){
     if(L.length>=n&&L.slice(0,n).every(x=>x.v>=hi)&&NX[e.id])return{w:0,v:Array(n).fill(hi),note:`Stark! Probier jetzt ${EXM[NX[e.id]].name}, tippe dafür auf Tauschen.`};
     return{w:0,v:Array.from({length:n},(_,j)=>Math.max(lo,(L[j]||L[L.length-1]).v+1)),note:'Ziel: je eine Wiederholung mehr als letztes Mal.'};
   }
-  if(!L||!(L[0].w>0))return{w:startW(e),v:Array(n).fill(Math.min(hi,lo+2)),first:true};
+  if(!L||!(L[0].w>0)){const rel=startEstimate(e);return{w:rel?rel.w:startW(e),v:Array(n).fill(Math.min(hi,lo+2)),first:true,note:rel?`Geschätzt aus ${rel.name}. Zum Einstieg etwas leichter.`:''}}
   if(cyc().dl)return{w:Math.max(step,Math.floor(L[0].w*.9/step)*step),v:Array(n).fill(lo),note:'Entlastungswoche: etwa 10 % leichter und 3 Wiederholungen im Tank lassen.'};
   const W=L[0].w,f=freqOf(e.id),best=Math.max(...L.map(s=>e1(s.w,s.v))),mx=Math.max(...L.map(s=>s.v)),at=x=>Math.max(step,Math.floor(x/step)*step);
   const top=x=>!!x&&x.length>=n&&x.slice(0,n).every(s=>s.v>=hi);
+  const R=rirHistory(e.id);if(R[0]&&R[0].rir===0&&L.some(x=>x.v<(x.p||lo)))return{w:W,v:Array(n).fill(lo),note:'Am Limit und das Ziel verfehlt. Heute gleiches Gewicht, bevor du steigerst.'};
+  if(R.length===2&&R.every(x=>x.rir===3))return{w:W+step,v:Array(n).fill(lo),up:true,note:`+${kg(step)} kg, weil zweimal noch mindestens 3 Wiederholungen drin waren.`};
   if(P.length>=3){const b=P.slice(0,3).map(x=>Math.max(...x.map(s=>e1(s.w,s.v))));if(b[0]<=b[2]*1.005&&b[0]<=b[1]*1.005)return{w:at(W*.9),v:Array(n).fill(hi),note:'Seit drei Einheiten kein Fortschritt. Diesmal 10 % leichter und sauber, danach geht es weiter bergauf.'}}
   if(mx>=hi+3){const w2=Math.max(W+step,at(best/(1+(lo+4)/30)));return{w:w2,v:Array(n).fill(lo+2),up:true,note:`+${kg(w2-W)} kg, weil ${kg(W)} kg zu leicht war.`}}
   if(top(L)&&(f<2||top(P[1])))return{w:W+step,v:Array(n).fill(lo),up:true,note:`+${kg(step)} kg, weil du alle Sätze mit ${hi} Wiederholungen geschafft hast.`};
@@ -1242,7 +1270,7 @@ function planView(){
     <p class="lf">${P.dur==='auto'?`Auto plant etwa ${planAvg()} min ein, so viel wie die empfohlenen Sätze brauchen. Mit jedem Training rechnet die App genauer mit deinem echten Tempo.`:'Passt nicht alles in die Zeit, kürzt die App zuerst bei Bauch, Waden und Armen.'}</p>
   <h3 class="lh">Zyklus</h3><div class="card"><p><b>Woche ${c.w+1} von 6:</b> ${CYCN[c.w]}</p><div class="cyc">${CYC.map((m,i)=>`<i class="${i===c.w?'on':''}" style="height:${Math.round(m*40)}px"></i>`).join('')}</div></div><p class="lf">${c.dl?'Diese Woche weniger Sätze und etwa 10 % leichter. So erholst du dich und startest danach stärker in den nächsten Zyklus.':'Die Sätze steigen von Woche zu Woche leicht an. In Woche 6 folgt eine leichtere Woche zur Erholung, danach beginnt der nächste Zyklus.'} Trainierst du in einer Woche zu wenig, zum Beispiel nur einmal, geht der Zyklus eine Woche zurück, höchstens bis Woche 1.${c.back?' <b>Diese Woche ist eine Stufe zurück, weil letzte Woche zu wenig trainiert wurde.</b>':''}</p>
   <h2 class="sh">Deine Woche</h2>
-  ${Object.keys(S.plan.days).map(wd=>{const d=S.plan.days[wd],items=dayItems(wd,d.pl);return`${soreNote(wd)}<h3 class="lh"><span>${WDL[wd]}, ${esc(d.title)}</span><span>${PLN[d.pl]}, ${dayMin(items)} min</span></h3><div class="list">${items.map(it=>xrow(it,d.pl,wd,'p')).join('')}</div>`}).join('')||'<p class="muted">Wähle oben mindestens einen Trainingstag.</p>'}
+  ${Object.keys(S.plan.days).map(wd=>{const d=S.plan.days[wd],items=dayItems(wd,d.pl,false);return`${soreNote(wd)}<h3 class="lh"><span>${WDL[wd]}, ${esc(d.title)}</span><span>${PLN[d.pl]}, ${dayMin(items)} min</span></h3><div class="list">${items.map(it=>xrow(it,d.pl,wd,'p')).join('')}</div>`}).join('')||'<p class="muted">Wähle oben mindestens einen Trainingstag.</p>'}
   <h3 class="lh">Erfahrung</h3>${segc('lvl',[[1,'Anfänger'],[2,'Fortgeschritten']],P.lvl,'Erfahrung')}<p class="lf">Fortgeschritten bringt etwa 40 % mehr Sätze und schwerere Übungen wie Kreuzheben und Klimmzüge.</p>
   <h3 class="lh">Worauf der Plan basiert</h3><div class="list sci">${sci.map(([a,b])=>`<div class="cell"><b>${a}</b><small>${b}</small></div>`).join('')}</div>`;
 }
@@ -1254,10 +1282,12 @@ function focusView(){
   let h=`<div class="ftop"><button class="x" data-act="end" aria-label="Training beenden">${ic('x')}</button><button class="dots" data-act="overview" aria-label="Übersicht: Übung ${s.idx+1} von ${s.items.length}">${s.items.map((q,i)=>{const dn=q.skip||q.sets.every(x=>x.done);return`<i class="${i===s.idx?'c':dn&&!q.skip?'d':''}"></i>`}).join('')}</button><span class="num el" id="elapsed">0:00</span></div>${undoSnap?`<button class="undo" data-act="undo">${ic('reset')}Letzten Satz rückgängig</button>`:''}
   <div class="stage">${figEl(animOf(it.id,s.pl),'',1)}</div>
   <h1 class="fname">${esc(it.name)}</h1><p class="cue">${esc(e.cue)}</p>${musBlock(e)}${it.ss?`<p class="note up">Supersatz mit ${esc((s.items.find((q,k)=>k!==s.idx&&q.ss===it.ss)||{}).name||'')}</p>`:''}${it.note?`<p class="note${it.up?' up':''}">${esc(it.note)}</p>`:''}`;
+  h+=rirBlock();
   const tl=[];if(it.id!=='warm'){tl.push(`<button data-act="swaplist" data-id="${it.id}" data-ctx="s" data-pl="${s.pl}">${ic('swap')}Tauschen</button>`);if(s.pl==='g'||(s.pl==='c'&&(PEQ[it.id]||[]).length))tl.push(`<button data-act="busy">${ic('clock')}Gerät besetzt</button>`)}tl.push(`<button data-act="skip">${ic('skip')}Überspringen</button>`);
   const links=`<div class="tools" style="--n:${tl.length}">${tl.join('')}</div>`;
   const gt=gearTxt(it.id);if(s.pl==='g'&&['m','k'].includes(eqOf(e)))h+=gt?`<button class="gearrow" data-act="gear" data-id="${it.id}">${ic('sliders')}<span>${esc(gt)}</span><small>Ändern</small></button>`:`<button class="link" data-act="gear" data-id="${it.id}">${ic('sliders')}Geräte-Einstellung merken</button>`;
   if(it.first&&it.step>0)return h+`<div class="first"><h3>Wie schwer startest du?</h3><p class="muted small" style="margin-top:4px">Nimm ein Gewicht, mit dem du etwa ${st.p} saubere Wiederholungen schaffst und noch 2 übrig hättest. Vorschlag: ${kg(startW(e))} kg${bw()?', passend zu deinem Körpergewicht':''}. Nach dem ersten Satz passt die App das Gewicht selbst an.</p>${wRow(it)}<button class="btn primary huge" data-act="firstok">Gewicht übernehmen</button></div>`+links;
+  h+=warmBlock(it);
   h+=`<div class="setrow"><p class="setl">Satz ${j+1} von ${it.sets.length}</p><div class="pills" aria-hidden="true">${it.sets.map((x,k)=>`<i class="${x.done?'d':k===j?'c':''}${k===pj?' pop':''}"></i>`).join('')}</div></div>${it.t==='r'?`<p class="muted small">Ziel: ${st.p} Wdh.${it.w?` mit ${kg(it.w)} kg`:''}, 1 bis 2 im Tank lassen</p>`:''}`;
   if(it.t==='t'){
     h+=`<div class="dial" id="tdial">${ring('tprog',6)}<div class="val" id="tnum">${fmt(run?(s.run.endAt-Date.now())/1000:st.v)}</div></div>`;
@@ -1353,7 +1383,7 @@ let mmode=null;
 function volOf(list){const v={},src={};GORD.forEach(g=>{v[g]=0;src[g]=[]});
   list.forEach(([id,wd,n])=>{const e=EXM[id];if(!e||id==='warm'||e.g==='ca'||!n)return;if(v[e.g]!=null){v[e.g]+=n;src[e.g].push([e.name,wd,n,1])}e.sec.forEach(g=>{if(v[g]!=null){v[g]+=n/2;src[g].push([e.name,wd,n,.5])}})});
   return{v,src}}
-const planVol=()=>volOf(Object.keys(S.plan.days).flatMap(wd=>S.plan.days[wd].items.map(it=>[it.id,+wd,it.sets||0])));
+const planVol=()=>volOf(Object.keys(S.plan.days).flatMap(wd=>dayItems(wd,S.plan.days[wd].pl,false).map(it=>[it.id,+wd,it.sets||0])));
 const doneVol=()=>{const now=Date.now();return volOf(H().filter(h=>h.start>now-7*DAY).flatMap(h=>h.items.map(it=>[it.id,wdOf(h.start),it.sets.length])))};
 function bodyMap(st){
   const half=(L,sep)=>`${L.map(([g,d])=>`<path d="${d}" data-act="muscle" data-g="${g}" style="fill:${mcol(st[g])}"><title>${GR[g]}</title></path>`).join('')}${sep?`<path class="sep" d="${sep}"/>`:''}`;
@@ -1361,16 +1391,18 @@ function bodyMap(st){
   return`<div class="bmap">${one(MFRONT,'M51 97H59M51 111H59','Vorne')}${one(MBACK,'','Hinten')}</div>`;
 }
 function muscleCard(){
+  if(mmode==='recovery'){const R=recovery(),st=Object.fromEntries(GORD.map(g=>[g,R[g].status]));return`<h2 class="sh">Muskeln</h2><section class="card">${segc('mmode',[['done','7 Tage'],['plan','Wochenplan'],['recovery','Erholung']],'recovery','Ansicht')}${bodyMap(st)}<div class="mleg">${[['Erholt','var(--green)'],['Teilweise','var(--yellow)'],['Frisch belastet','var(--red)']].map(([l,c])=>`<span><i class="dot" style="--c:${c}"></i>${l}</span>`).join('')}</div><p class="lf">Orientierung aus deinem Verlauf. Unter 48 Stunden nach mindestens 6 Sätzen gibt es heute einen Satz weniger, mindestens 2.</p></section><div class="list">${GORD.map(g=>`<button class="cell" data-act="muscle" data-g="${g}"><i class="dot" style="--c:${mcol(st[g])}"></i><span class="ct"><b>${GR[g]}</b><small>${R[g].last?`Zuletzt vor ${Math.floor(R[g].hours)} Stunden, ${kg(R[g].sets)} Sätze`:'Noch kein Training im Verlauf'}</small></span></button>`).join('')}</div>`}
   const T=targets(),D=doneVol(),P=planVol(),any=GORD.some(g=>D.v[g]>0),mm=mmode||(any?'done':'plan'),V=mm==='done'?D.v:P.v,st={};
   GORD.forEach(g=>{st[g]=mstat(V[g],T[g])});
   const low=GORD.filter(g=>st[g]>=2),f1=x=>kg(Math.round(x*2)/2);
-  return`<h2 class="sh">Muskeln</h2><section class="card">${segc('mmode',[['done','Letzte 7 Tage'],['plan','Plan pro Woche']],mm,'Ansicht')}${bodyMap(st)}
+  return`<h2 class="sh">Muskeln</h2><section class="card">${segc('mmode',[['done','7 Tage'],['plan','Wochenplan'],['recovery','Erholung']],mm,'Ansicht')}${bodyMap(st)}
     <div class="mleg">${MST.map(([l,c])=>`<span><i class="dot" style="--c:${c}"></i>${l}</span>`).join('')}</div>
     <p class="msum">${low.length?`${mm==='done'?'Zu wenig trainiert':'Im Plan zu kurz'}: ${low.map(g=>GR[g]).join(', ')}.`:mm==='done'?'Alle Muskeln sind gut trainiert.':'Der Plan deckt alle Muskeln gut ab.'}</p></section>
   <div class="list">${GORD.filter(g=>T[g]>0).map(g=>`<button class="cell mrow" data-act="muscle" data-g="${g}"><i class="dot" style="--c:${mcol(st[g])}"></i><span class="ct"><b>${GR[g]}</b>${bar('m'+g,V[g]/T[g]*100,mcol(st[g]))}</span><span class="cv num">${f1(V[g])} / ${T[g]}</span>${ic('chev','chev')}</button>`).join('')}</div>
   <p class="lf">Sätze pro Woche im Vergleich zum Ziel. Übungen zählen für ihren Hauptmuskel ganz und für Nebenmuskeln halb, zum Beispiel Bankdrücken auch halb für Trizeps und Schultern.</p>`;
 }
 function muscleSheet(g){
+  if(mmode==='recovery'){const r=recovery()[g];openSheet(`<h3>${GR[g]}: Erholung</h3><p class="muted">${r.last?`Letztes Training vor ${Math.floor(r.hours)} Stunden mit ${kg(r.sets)} Sätzen.`:'Noch kein Training im Verlauf.'} ${r.hardHours<48?'Weniger als 48 Stunden seit mindestens 6 Sätzen. Heute ein Satz weniger pro Übung, mindestens 2.':'Kein hartes Training in den letzten 48 Stunden.'} Hauptmuskeln zählen ganz, Nebenmuskeln halb. Deine Tagesform und Muskelkater kannst du vor dem Start angeben.</p>`);return}
   const T=targets(),t=T[g]||0,P=planVol(),D=doneVol(),sp=mstat(P.v[g],t),sd=mstat(D.v[g],t),f1=x=>kg(Math.round(x*2)/2);
   const rows=(src,empty)=>{const m=new Map();src.forEach(([n,wd,c,f])=>{const o=m.get(n)||{d:[],v:0,f};if(!o.d.includes(wd))o.d.push(wd);o.v+=c*f;m.set(n,o)});
     return m.size?[...m].sort((a,b)=>b[1].v-a[1].v).map(([n,o])=>`<div class="cell"><span class="ct"><b>${esc(n)}</b><small>${o.d.sort((a,b)=>a-b).map(d=>WD[d]).join(', ')}${o.f<1?', als Nebenmuskel halb gezählt':''}</small></span><span class="cv num">${f1(o.v)}</span></div>`).join(''):`<div class="cell"><span class="ct muted">${empty}</span></div>`};
@@ -1658,7 +1690,7 @@ function completeSet(val){
   const s=S.session,it=s.items[s.idx],j=it.sets.findIndex(x=>!x.done);if(j<0)return;
   undoSnap={s:JSON.stringify(s)};clearTimeout(undoT);undoT=setTimeout(()=>{undoSnap=null;document.querySelectorAll('[data-act=undo]').forEach(b=>b.remove())},60000);
   const busy=busyState(s);busy.seen=[];busy.blocked=[];busy.wait=busy.wait.filter(id=>id!==it.id);
-  const st=it.sets[j];if(val!=null)st.v=val;st.w=it.w;st.done=true;s.run=null;s.lastAt=Date.now();autoAdjust(it,st);popSet={i:s.idx,j};
+  const st=it.sets[j];if(val!=null)st.v=val;st.w=it.w;st.done=true;s.run=null;if(it.warm)s.warmupDone=true;if(!it.sets.some(x=>!x.done)&&it.step>0&&it.w>0)s.rirAsk=it.id;s.lastAt=Date.now();autoAdjust(it,st);popSet={i:s.idx,j};
   if(it.id!=='warm'){if(isRecord(it,st))celebrate(it);else burst()}
   if(!it.sets.some(x=>!x.done)&&it.id!=='warm'&&EXM[it.id].g!=='ca'&&!(S.setup.ok||{})[it.id]&&sessionsFor(it.id,it.name).length<2)s.rate=it.id;
   let rest=it.rest;const pi=it.ss?s.items.findIndex((q,k)=>k!==s.idx&&q.ss===it.ss&&!q.skip):-1;
@@ -1720,14 +1752,14 @@ function burst(){if(REDUCE.matches)return;const d=document.createElement('div');
 function startRest(sec,why){S.session.rest={endAt:Date.now()+sec*1000,total:sec,fired:false,why:why||''};save();showRest()}
 function showRest(){
   const s=S.session,it=s.items[s.idx],j=it.sets.findIndex(x=>!x.done),el=document.getElementById('rest');
-  el.innerHTML=`<div class="rin"><p class="rl" id="rtitle">${s.rest.total<=25?'Wechsel':'Pause'}</p><div class="dial" id="rdial">${ring('rprog',6)}<div class="val" id="rnum">${fmt((s.rest.endAt-Date.now())/1000)}</div></div><p class="rn">Als Nächstes: ${esc(it.name)}${j>=0?`, Satz ${j+1}`:''}</p>${s.rest.why?`<p class="note up" style="margin:-12px 0 18px">${esc(s.rest.why)}</p>`:''}${rateBlock()}${undoSnap?`<button class="undo" data-act="undo">${ic('reset')}Satz rückgängig</button>`:''}<div class="row"><button class="btn ghost" data-act="radj" data-v="-15" aria-label="15 Sekunden weniger">−15 s</button><button class="btn ghost" data-act="radj" data-v="15" aria-label="15 Sekunden mehr">+15 s</button><button class="btn primary" data-act="rskip">Weiter${ic('skip')}</button></div></div>`;
+  el.innerHTML=`<div class="rin"><p class="rl" id="rtitle">${s.rest.total<=25?'Wechsel':'Pause'}</p><div class="dial" id="rdial">${ring('rprog',6)}<div class="val" id="rnum">${fmt((s.rest.endAt-Date.now())/1000)}</div></div><p class="rn">Als Nächstes: ${esc(it.name)}${j>=0?`, Satz ${j+1}`:''}</p>${s.rest.why?`<p class="note up" style="margin:-12px 0 18px">${esc(s.rest.why)}</p>`:''}${rirBlock()}${rateBlock()}${undoSnap?`<button class="undo" data-act="undo">${ic('reset')}Satz rückgängig</button>`:''}<div class="row"><button class="btn ghost" data-act="radj" data-v="-15" aria-label="15 Sekunden weniger">−15 s</button><button class="btn ghost" data-act="radj" data-v="15" aria-label="15 Sekunden mehr">+15 s</button><button class="btn primary" data-act="rskip">Weiter${ic('skip')}</button></div></div>`;
   el.classList.remove('go');el.classList.add('show');tick();
 }
 function hideRest(){if(S.session&&S.session.rest){S.session.rest=null;save()}document.getElementById('rest').classList.remove('show','go')}
 function openFinish(){
   const s=S.session;let total=0,done=0,vol=0;s.items.forEach(it=>{if(it.id==='warm')return;it.sets.forEach(x=>{total++;if(x.done){done++;if(it.t==='r')vol+=x.v*x.w}})});
   const all=done===total,min=Math.max(1,Math.round((Date.now()-s.start)/60000)),prs=s.items.filter(it=>it.pr);
-  openSheet(done?`${rateBlock()}<h3>${all?'Geschafft!':'Training beenden?'}</h3>${prs.length?`<p class="note up">${prs.length===1?'Neuer Rekord':'Neue Rekorde'}: ${prs.map(it=>`${esc(it.name)} (${esc(it.pr)})`).join(', ')}</p>`:''}<div class="stats"><div><b>${done}<small style="font-size:15px;color:var(--label2)">/${total}</small></b><span>Sätze</span></div><div><b>${min}</b><span>Minuten</span></div><div><b>${vol?kg(Math.round(vol)):'0'}</b><span>kg bewegt</span></div></div>${moreBlock()}<button class="btn primary big" data-act="finish">Training speichern</button>${undoSnap?`<button class="link center" data-act="undo">${ic('reset')}Letzten Satz rückgängig</button>`:''}${all?'':'<button class="link center" data-act="sheetclose">Weiter trainieren</button>'}<button class="link danger center" data-act="discard">${armed==='discard'?'Nochmal tippen: verwerfen':'Training verwerfen'}</button>`
+  openSheet(done?`${rirBlock()}${rateBlock()}<h3>${all?'Geschafft!':'Training beenden?'}</h3>${prs.length?`<p class="note up">${prs.length===1?'Neuer Rekord':'Neue Rekorde'}: ${prs.map(it=>`${esc(it.name)} (${esc(it.pr)})`).join(', ')}</p>`:''}<div class="stats"><div><b>${done}<small style="font-size:15px;color:var(--label2)">/${total}</small></b><span>Sätze</span></div><div><b>${min}</b><span>Minuten</span></div><div><b>${vol?kg(Math.round(vol)):'0'}</b><span>kg bewegt</span></div></div>${moreBlock()}<button class="btn primary big" data-act="finish">Training speichern</button>${undoSnap?`<button class="link center" data-act="undo">${ic('reset')}Letzten Satz rückgängig</button>`:''}${all?'':'<button class="link center" data-act="sheetclose">Weiter trainieren</button>'}<button class="link danger center" data-act="discard">${armed==='discard'?'Nochmal tippen: verwerfen':'Training verwerfen'}</button>`
     :'<h3>Training beenden?</h3><p class="muted">Noch kein Satz erledigt, es wird nichts gespeichert.</p><button class="btn primary big" data-act="finish">Beenden</button><button class="link center" data-act="sheetclose">Weiter trainieren</button>');
 }
 /* Noch eine Übung: zuerst Übersprungenes nachholen, dann Muskeln, die diese Woche zu kurz kamen */
@@ -1751,7 +1783,7 @@ function addExtra(id){
 }
 function finalize(auto){
   const s=S.session;if(!s)return false;let total=0,done=0;
-  const items=s.items.filter(it=>it.id!=='warm').map(it=>{total+=it.sets.length;const sets=it.sets.filter(x=>x.done).map(x=>({v:x.v,w:x.w}));done+=sets.length;return{id:it.id,name:it.name,t:it.t,sets}}).filter(it=>it.sets.length);
+  const items=s.items.filter(it=>it.id!=='warm').map(it=>{total+=it.sets.length;const sets=it.sets.filter(x=>x.done).map(x=>({v:x.v,w:x.w,...(x.p!=null?{p:x.p}:{})}));done+=sets.length;return{id:it.id,name:it.name,t:it.t,sets,...(it.rir!=null?{rir:it.rir}:{})}}).filter(it=>it.sets.length);
   if(items.length)S.history.push({id:uid(),dl:cyc().dl,...(s.form==='muede'?{form:'muede'}:{}),start:s.start,end:auto?(s.lastAt||s.start):Date.now(),pl:s.pl,title:s.title,planned:s.planned,comp:total?done/total:1,items});
   undoSnap=null;hideRest();closeSheet();S.session=null;save();sleep();return items.length>0;
 }
@@ -1867,6 +1899,9 @@ function act(b){
     case'soretoggle':if(SO){const i=SO.gs.indexOf(v);i<0?SO.gs.push(v):SO.gs.splice(i,1);drawSore()}break;
     case'soreapply':applySore(SO.gs);break;
     case'sorereset':applySore([]);break;
+    case'warmdone':{const it=s.items[s.idx],q=it.warm&&it.warm[+b.dataset.i];if(q){q.done=!q.done;if(it.warm.every(x=>x.done))s.warmupDone=true;save();render()}break}
+    case'warmskip':s.warmupDone=true;save();render();break;
+    case'rir':{const it=s.items.find(q=>q.id===id);if(it&&[0,1,3].includes(+v)){it.rir=+v;s.rirAsk=null;save();render();if(s.rest)showRest();else if(document.getElementById('sheet').classList.contains('show'))openFinish()}break}
     case'busy':busy();break;
     case'busyalt':busyReplace(id);break;
     case'busyagain':busyState(s).seen=[];busyState(s).blocked=[];closeSheet();save();render();break;
