@@ -15,7 +15,7 @@ Ab dann läuft die App offline. Deine Trainingsdaten liegen nur auf dem
 iPhone, nicht auf GitHub. Das Repository enthält nur den Code.
 
 UPDATE
-Neue index.html auf GitHub hochladen und die alte ersetzen. Die App holt
+Neue index.html, sw.js und ANLEITUNG.txt auf GitHub hochladen und ersetzen. Die App holt
 sich das Update beim nächsten Öffnen mit Internet selbst und zeigt es
 spätestens beim zweiten Start.
 
@@ -29,68 +29,37 @@ Das Symbol auf dem Home-Bildschirm nicht löschen. Damit wären auch die
 Daten weg, außer du hast ein Backup.
 
 NEU IN DIESER VERSION
-Heute
-- Ringe zeigen das Wochenziel: Trainings, Sätze und Minuten.
-- Vor 12 Uhr fragt eine kleine Karte nach dem Gewicht. Eintippen (Komma
-  geht), Speichern, fertig. Mit dem X fragt sie heute nicht mehr.
-- Montags steht oben der Rückblick auf die letzte Woche: was gut lief,
-  welcher Muskel zu kurz kam und was die App für die neue Woche anpasst.
-- Fällt ein Training aus, rutscht es nach. Am Ruhetag danach kannst du es
-  nachholen, sonst kommt es beim nächsten Training dran.
+- Gerät besetzt: Du siehst jede noch offene freie Übung einmal. Erst danach
+  gibt es einen Ersatzvorschlag. Wartende Geräte kommen nach einer fertigen
+  Übung zuerst dran. Im Park werden besetzte Geräte gemerkt, im Studio
+  werden andere Gerätetypen bevorzugt. Satz rückgängig stellt alles zurück.
+- Muskelkater vor dem Start melden: Hauptmuskeln setzen heute aus und kommen
+  möglichst im nächsten Training dieser Woche dran. Dafür kommen andere
+  Übungen vor. Nebenmuskeln bekommen einen Satz weniger. Ab Montag ist der
+  normale Plan wieder da. Die Änderung bleibt auf diesem Gerät und ist im
+  Backup enthalten. Ohne weiteres Training wird der Ausfall im Rückblick
+  berücksichtigt. Zurücksetzen hebt die Meldung für den Tag wieder auf.
+- Erholung: Nach mindestens 6 Sätzen für einen Muskel und weniger als
+  48 Stunden Pause gibt es pro Übung einen Satz weniger, mindestens 2.
+  Im Körperbild unter Fortschritt kannst du jetzt Erholung auswählen.
+- Neues Startgewicht: Die App schätzt vorsichtig aus ähnlichen Übungen
+  und nennt dir die Quelle. Du kannst das Gewicht vor dem Start anpassen.
+- Vor der ersten schweren Grundübung im Studio stehen 3 Aufwärmsätze.
+  Abhaken oder überspringen. Sie zählen nicht in Statistik oder Rekorde.
+- Nach der letzten Wiederholung kannst du freiwillig sagen, wie viele noch
+  drin gewesen wären. Zweimal 3+ bedeutet mehr Gewicht. Am Limit mit
+  verfehltem Ziel bedeutet erst einmal gleiches Gewicht.
+- 15 neue Studio-Übungen, darunter 3 Wadenmaschinen-Varianten, T-Bar-Rudern,
+  unterstützte Klimmzüge und Dips, Scott-Curls, Beinbeuger liegend,
+  Hip-Thrust-Maschine und Ab-Roller. Brustgestütztes Maschinenrudern war
+  schon vorhanden und heißt jetzt eindeutiger. Unterstützung an Klimmzug-
+  und Dip-Maschine wird unter Geräte-Einstellung notiert, weil mehr
+  Unterstützung die Übung leichter macht.
+- Bei Langhantelübungen auf das Gewicht beim Scheiben-Link tippen:
+  Der Rechner zeigt die Scheiben pro Seite. Unter Plan wählst du eine
+  15- oder 20-kg-Stange. Nicht passende Gewichte werden erklärt.
+- Körpergewicht, Zunahme-Coach und vorhandene Backups bleiben erhalten.
 
-Training
-- "Training starten" fragt nach der Tagesform. Fit, Normal oder Müde
-  antippen startet sofort. Bei Müde gibt es einen Satz weniger und etwa
-  10 % weniger Gewicht.
-- Darüber kannst du die Zeit für heute wählen (45, 30 oder 20 min). Die
-  Grundübungen bleiben, der Rest läuft als Supersätze.
-- "Gerät besetzt" zieht eine Übung für dieselben Muskeln vor. Die besetzte
-  kommt danach dran.
-- Bei Maschinen und Kabeln: "Geräte-Einstellung merken" speichert Sitz,
-  Polster und eine Notiz. Beim nächsten Mal steht sie bei der Übung.
-- Nach jedem Satz gibt es "Satz rückgängig", in der Pause und im Training.
-- Lag ein Satz deutlich unter dem Ziel, wird die Pause automatisch länger.
-- Neue Bestwerte feiert die App direkt. Alle Rekorde stehen unter
-  Fortschritt.
-- Tipp auf die Balken oben öffnet die Übersicht. Dort kannst du Übungen
-  vorziehen und übersprungene nachholen.
-
-Muskeln
-- Bei jeder Übung steht, welcher Muskel trainiert wird: in den Listen,
-  im Training und im Übungsblatt. Das kleine Körperbild zeigt den
-  Hauptmuskel kräftig und die Nebenmuskeln heller.
-
-Calisthenics-Park
-- Unter Plan bei den Trainingstagen einen Tag mehrmals antippen:
-  Gym, Zuhause, Park, frei. Oder unter Heute oben "Park" wählen.
-- Unter "Geräte im Park" alle Geräte anschalten, die es dort gibt
-  (Klimmzugstange, Barren, Reck, Ringe, Bank, Sprossenwand,
-  Hangelleiter). Die App stellt die Übungen danach zusammen.
-- Ist ein Gerät besetzt, zum Beispiel die Klimmzugstange: "Gerät besetzt"
-  tippen. Die Übung kommt später im Training dran.
-- Im Park gibt es bis zu 77 Übungen, je nach Geräten und Erfahrung, zum
-  Beispiel Klimmzüge im Untergriff, Hangeln, L-Sitz, Füße zur Stange,
-  Ring-Liegestütze, Pistol Squat zur Bank und Negative Dips.
-- Im Park und zu Hause wechseln gleichwertige Übungen jede Woche. Im Gym
-  bleiben die Übungen gleich, damit die Steigerung gut messbar ist.
-
-Ende des Trainings
-- Nach dem letzten Satz fragt die App, ob du noch etwas dranhängen
-  willst. Übersprungenes steht oben, darunter Vorschläge für Muskeln,
-  die diese Woche zu kurz kamen. Antippen und weiter geht es. Unter
-  "Andere Übung wählen" gibt es alle Übungen.
-
-Zyklus
-- Trainierst du in einer Woche zu wenig (weniger als 2 Trainings, bei 4
-  oder mehr geplanten Tagen weniger als die Hälfte), geht der Zyklus eine
-  Woche zurück, zum Beispiel von Woche 5 auf Woche 4, höchstens bis
-  Woche 1. Die Entlastungswoche wird nicht zurückgestuft.
-
-Fortschritt
-- Das Körperbild zeigt, welche Muskeln gut trainiert sind (grün) und welche
-  zu kurz kommen (gelb, orange, rot). Oben umschalten zwischen den letzten
-  7 Tagen und dem Plan. Tipp auf einen Muskel zeigt die Übungen dazu.
-- Der Zunahme-Coach unter Körpergewicht sagt, ob dein Tempo passt, und
-  gibt einen Tipp in kcal pro Tag.
-- Team einladen: "Einladen" oder "WhatsApp" verschickt einen Link. Wer
-  darauf tippt und angemeldet ist, ist direkt im Team.
+UPDATE AUF DEM IPHONE
+Mit Internet öffnen, schließen und wieder öffnen. Die Cache-Version
+training-v11 sorgt dafür, dass die neue Version auch offline bleibt.
