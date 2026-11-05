@@ -333,9 +333,9 @@ label.cell:active{background:transparent}
 .first .ctl{background:none;padding:0}
 
 /* Pause */
-.rover{position:fixed;inset:0;z-index:45;background:var(--bg);display:flex;align-items:center;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));opacity:0;visibility:hidden;transform:scale(1.06);transition:opacity .25s,transform .55s var(--spring),visibility 0s .3s,background-color .35s}
+.rover{overflow-y:auto;position:fixed;inset:0;z-index:45;background:var(--bg);display:flex;align-items:flex-start;justify-content:center;padding:calc(20px + env(safe-area-inset-top,0px)) 24px calc(24px + env(safe-area-inset-bottom,0px));opacity:0;visibility:hidden;transform:scale(1.06);transition:opacity .25s,transform .55s var(--spring),visibility 0s .3s,background-color .35s}
 .rover.show{opacity:1;visibility:visible;transform:none;transition:opacity .25s,transform .55s var(--spring),background-color .35s}
-.rin{width:100%;max-width:420px;text-align:center}
+.rin{margin:auto 0;flex-shrink:0;width:100%;max-width:420px;text-align:center}
 .rl{font:700 34px/41px var(--font);margin-bottom:6px}
 .rn{color:var(--label2);margin:12px 0 24px}
 .rover .dial{width:min(270px,72vw)}
@@ -347,6 +347,8 @@ label.cell:active{background:transparent}
 .rover.go .prog{stroke:#fff}
 .rover.go .ghost{background:rgba(255,255,255,.22);color:#fff}
 .rover.go .primary{background:#fff;color:var(--green)}
+.rir .chips{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+.rir .chip{padding:8px 4px;font-size:13px;line-height:18px}
 .rate{background:var(--card);border-radius:18px;padding:14px 16px;margin:0 0 18px;text-align:left}
 .rate .row{margin-top:10px}
 .rover.go .rate{background:rgba(255,255,255,.18)}
@@ -663,21 +665,21 @@ const LIB=[
 ['fuesse_zur_stange','Füße zur Stange','c','ba','ru','r',5,12,90,0,2,'',0,'Im Hängen die gestreckten Beine bis zur Stange heben, ohne Schwung.'],
 ['situps_eingehakt','Sit-ups mit eingehakten Füßen','c','ba','','r',10,20,60,0,1,'',0,'Füße unter Reck oder Sprossenwand einhaken, langsam hoch und runter.'],
 ['knieheben_schraeg','Knieheben schräg am Barren','c','ba','','r',8,12,60,0,1,'',0,'Wiederholungen pro Seite. Im Stütz die Knie abwechselnd zur linken und rechten Schulter ziehen.'],
-["wadenmaschine_stehend","Wadenheben an der Maschine stehend","g","wa","","r",10,15,60,5,1,"s",30,"Schultern unter die Polster, Knie leicht gebeugt. Fersen langsam senken und weit anheben."],
-["wadenmaschine_sitzend","Wadenheben sitzend an der Maschine","g","wa","","r",12,20,60,5,1,"",20,"Polster knapp hinter die Knie, Fersen langsam tief senken und ohne Schwung anheben."],
-["wadendruecken_beinpresse","Wadendrücken an der Beinpresse","g","wa","","r",10,20,60,5,1,"s",40,"Fußballen sicher auf der Platte, Knie leicht gebeugt halten. Nur die Sprunggelenke bewegen."],
-["tbar_rudern","T-Bar-Rudern","g","ru","bi,sc","r",8,12,120,2.5,2,"c",20,"Hüfte nach hinten, Rücken ruhig. Griffe zum Bauch ziehen. Gewicht der aufgelegten Scheiben."],
-["kabelrudern_einarmig","Einarmiges Kabelrudern","g","ru","bi,sc","r",8,12,90,2.5,1,"c",12.5,"Wiederholungen pro Arm. Rumpf gerade halten, Ellbogen zur Hüfte ziehen."],
-["klimmzug_assist","Klimmzug-Maschine mit Unterstützung","g","ru","bi","r",6,12,120,0,1,"c",0,"Knie aufs Polster, kontrolliert hochziehen. Mehr Unterstützung macht es leichter. Unterstützung unter Geräte-Einstellung notieren."],
-["dip_assist","Dip-Maschine mit Unterstützung","g","br","tr,sc","r",6,12,120,0,1,"c",0,"Knie aufs Polster, leicht vorlehnen, nur schmerzfrei absenken. Mehr Unterstützung macht es leichter. Einstellung am Gerät merken."],
-["trizeps_kickback_kabel","Kabel-Trizeps-Kickback","g","tr","","r",10,15,90,1.25,1,"",3.75,"Wiederholungen pro Arm. Oberkörper vorlehnen, Oberarm ruhig halten und Unterarm nach hinten strecken."],
-["scott_curls","Scott-Curls auf der Larry-Scott-Bank","g","bi","","r",10,15,90,1,1,"",7,"Kurzhantel pro Hand. Oberarm liegt auf dem Polster. Langsam senken, Ellbogen nicht durchdrücken."],
-["kabel_curls_hinten","Kabel-Curls einarmig hinter dem Körper","g","bi","","r",10,15,90,1.25,1,"s",5,"Wiederholungen pro Arm. Tiefes Kabel hinter dir, Oberarm leicht hinter dem Körper lassen."],
-["beinbeuger_liegend","Beinbeuger liegend","g","hi","","r",10,15,90,5,1,"",20,"Knie an der Drehachse, Becken bleibt auf dem Polster. Fersen langsam zum Po ziehen."],
-["kabel_pullthrough","Kabel-Pull-Through","g","hi","ru","r",10,15,90,2.5,1,"c",17.5,"Mit dem Rücken zum tiefen Kabel, Seil zwischen den Beinen. Hüfte zurückschieben und aus dem Po aufrichten."],
-["hipthrust_maschine","Hip Thrust an der Maschine","g","hi","qu","r",8,12,120,5,1,"c",30,"Polster über der Hüfte, Bauch fest. Po oben anspannen, nicht ins Hohlkreuz drücken."],
-["kabel_holzhacker","Kabel-Holzhacker","g","ba","","r",10,15,60,2.5,1,"",7.5,"Wiederholungen pro Seite. Seil diagonal vor dem Körper ziehen, Hüfte kontrolliert mitdrehen."],
-["ab_roller","Ab-Roller","g","ba","sc","r",6,12,90,0,2,"",0,"Auf den Knien starten, Bauch fest. Nur so weit ausrollen, wie du ohne Hohlkreuz zurückkommst."],
+['wadenmaschine_stehend','Wadenheben an der Maschine stehend','g','wa','','r',10,15,60,5,1,'s',30,'Schultern unter die Polster, Knie leicht gebeugt. Fersen langsam senken und weit anheben.'],
+['wadenmaschine_sitzend','Wadenheben sitzend an der Maschine','g','wa','','r',12,20,60,5,1,'',20,'Polster knapp hinter die Knie, Fersen langsam tief senken und ohne Schwung anheben.'],
+['wadendruecken_beinpresse','Wadendrücken an der Beinpresse','g','wa','','r',10,20,60,5,1,'s',40,'Fußballen sicher auf der Platte, Knie leicht gebeugt halten. Nur die Sprunggelenke bewegen.'],
+['tbar_rudern','T-Bar-Rudern','g','ru','bi,sc','r',8,12,120,2.5,2,'c',20,'Hüfte nach hinten, Rücken ruhig. Griffe zum Bauch ziehen. Gewicht der aufgelegten Scheiben.'],
+['kabelrudern_einarmig','Einarmiges Kabelrudern','g','ru','bi,sc','r',8,12,90,2.5,1,'c',12.5,'Wiederholungen pro Arm. Rumpf gerade halten, Ellbogen zur Hüfte ziehen.'],
+['klimmzug_assist','Klimmzug-Maschine mit Unterstützung','g','ru','bi','r',6,12,120,0,1,'c',0,'Knie aufs Polster, kontrolliert hochziehen. Mehr Unterstützung macht es leichter. Unterstützung unter Geräte-Einstellung notieren.'],
+['dip_assist','Dip-Maschine mit Unterstützung','g','br','tr,sc','r',6,12,120,0,1,'c',0,'Knie aufs Polster, leicht vorlehnen, nur schmerzfrei absenken. Mehr Unterstützung macht es leichter. Einstellung am Gerät merken.'],
+['trizeps_kickback_kabel','Kabel-Trizeps-Kickback','g','tr','','r',10,15,90,1.25,1,'',3.75,'Wiederholungen pro Arm. Oberkörper vorlehnen, Oberarm ruhig halten und Unterarm nach hinten strecken.'],
+['scott_curls','Scott-Curls auf der Larry-Scott-Bank','g','bi','','r',10,15,90,1,1,'',7,'Kurzhantel pro Hand. Oberarm liegt auf dem Polster. Langsam senken, Ellbogen nicht durchdrücken.'],
+['kabel_curls_hinten','Kabel-Curls einarmig hinter dem Körper','g','bi','','r',10,15,90,1.25,1,'s',5,'Wiederholungen pro Arm. Tiefes Kabel hinter dir, Oberarm leicht hinter dem Körper lassen.'],
+['beinbeuger_liegend','Beinbeuger liegend','g','hi','','r',10,15,90,5,1,'',20,'Knie an der Drehachse, Becken bleibt auf dem Polster. Fersen langsam zum Po ziehen.'],
+['kabel_pullthrough','Kabel-Pull-Through','g','hi','ru','r',10,15,90,2.5,1,'c',17.5,'Mit dem Rücken zum tiefen Kabel, Seil zwischen den Beinen. Hüfte zurückschieben und aus dem Po aufrichten.'],
+['hipthrust_maschine','Hip Thrust an der Maschine','g','hi','qu','r',8,12,120,5,1,'c',30,'Polster über der Hüfte, Bauch fest. Po oben anspannen, nicht ins Hohlkreuz drücken.'],
+['kabel_holzhacker','Kabel-Holzhacker','g','ba','','r',10,15,60,2.5,1,'',7.5,'Wiederholungen pro Seite. Seil diagonal vor dem Körper ziehen, Hüfte kontrolliert mitdrehen.'],
+['ab_roller','Ab-Roller','g','ba','sc','r',6,12,90,0,2,'',0,'Auf den Knien starten, Bauch fest. Nur so weit ausrollen, wie du ohne Hohlkreuz zurückkommst.'],
 ];
 const EX=LIB.map((a,i)=>({i,id:a[0],name:a[1],pl:a[2],g:a[3],sec:a[4]?a[4].split(','):[],t:a[5],lo:a[6],hi:a[7],rest:a[8],step:a[9],lvl:a[10],c:a[11].includes('c'),s:a[11].includes('s'),sw:a[12],cue:a[13],sets:3}));
 const EXM=Object.fromEntries(EX.map(e=>[e.id,e]));
@@ -864,7 +866,7 @@ function eq(x,w,e,S,h,a){
 }
 function fig(id,ms){
   const A=ANIM[id];if(!A)return'';
-  const K=A._k||(A._k=A.k.map(p=>res(p,A))),v=ms==null?K[Math.min(1,K.length-1)]:frameAt(A,K,ms);
+  const K=A._k||(A._k=A.k.map(p=>res(p,A))),v=ms==null||REDUCE.matches?K[Math.min(1,K.length-1)]:frameAt(A,K,ms);
   const h=[v[0],v[1]],t=v[2],S=mv(h,t,38),hd=mv(S,t,11.5),es=A.es||1,ks=A.ks||-1,m=A.m;
   const[e1,w1]=ik(S,[v[3],v[4]],20,19,es),[e2,w2]=ik(S,[v[5],v[6]],20,19,m?-es:es),[k1,a1]=ik(h,[v[7],v[8]],24,24,ks),[k2,a2]=ik(h,[v[9],v[10]],24,24,m?-ks:ks);
   const fa=v[11]!==999?v[11]:angp(k1,a1)-90,fb=m?180-fa:(v[11]!==999?v[11]:angp(k2,a2)-90);
@@ -901,7 +903,7 @@ function normalize(s){
   s.setup=Object.assign(d.setup,s.setup||{});
   ['history','body'].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});
   s.swaps=s.swaps||{};s.gear=s.gear&&typeof s.gear==='object'?s.gear:{};s.ui=s.ui&&typeof s.ui==='object'?s.ui:{};s.settings=Object.assign({goalKg:0,barKg:20},s.settings||{});if(![15,20].includes(s.settings.barKg))s.settings.barKg=20;s.nut=s.nut||{};s.meas=Array.isArray(s.meas)?s.meas:[];s.del=Array.isArray(s.del)?s.del:[];
-  if(!s.wk||typeof s.wk!=='object'||Array.isArray(s.wk))s.wk=null;else{for(const k of['sore','add','drop','route','msg'])if(!s.wk[k]||typeof s.wk[k]!=='object'||Array.isArray(s.wk[k]))s.wk[k]={};if(!Array.isArray(s.wk.order))s.wk.order=[];if(!Array.isArray(s.wk.omit))s.wk.omit=[]}
+  if(!s.wk||typeof s.wk!=='object'||Array.isArray(s.wk))s.wk=null;else{for(const k of['sore','add','drop','route','when','reported','msg'])if(!s.wk[k]||typeof s.wk[k]!=='object'||Array.isArray(s.wk[k]))s.wk[k]={};if(!Array.isArray(s.wk.order))s.wk.order=[];if(!Array.isArray(s.wk.omit))s.wk.omit=[]}
   if(s.session&&!Array.isArray(s.session.items))s.session=null;
   return s;
 }
@@ -1048,29 +1050,29 @@ function dayItems(wd,pl,adjust=true){
   const L=weekItems(wd,pl),w=S.wk,gs=w&&w.wk===ymd(monday(Date.now()))&&Array.isArray(w.sore[wd])?w.sore[wd]:[];
   return L.filter(it=>!gs.includes(EXM[it.id].g)).map(it=>{const sec=EXM[it.id].sec.filter(g=>gs.includes(g));if(sec.length){it.sets=Math.max(1,it.sets-1);it.note=`Leichter wegen Muskelkater im Bereich ${sec.map(g=>GR[g]).join(' und ')}. Ein Satz weniger.`}return adjust?recoverItem(it):it});
 }
-function soreWeek(){const wk=ymd(monday(Date.now()));if(!S.wk||S.wk.wk!==wk)S.wk={wk,sore:{},add:{},drop:{},route:{},order:[],msg:{},omit:[]};return S.wk}
+function soreWeek(){const wk=ymd(monday(Date.now()));if(!S.wk||S.wk.wk!==wk)S.wk={wk,sore:{},add:{},drop:{},route:{},when:{},reported:{},order:[],msg:{},omit:[]};return S.wk}
 function rebuildSore(){
   const w=S.wk;if(!w||w.wk!==ymd(monday(Date.now())))return;w.add={};w.drop={};w.msg={};w.omit=[];
   const drop=(wd,id)=>{const L=w.drop[wd]=w.drop[wd]||[];if(!L.includes(id))L.push(id);w.add[wd]=(w.add[wd]||[]).filter(q=>q.id!==id)};
   const put=(wd,it,from)=>{const L=w.add[wd]=w.add[wd]||[],old=L.find(q=>q.id===it.id);if(old)old.sets+=it.sets;else L.push({...it,ss:undefined,from})};
-  const yesterday=new Set(H().filter(h=>ymd(h.start)===ymd(Date.now()-DAY)).flatMap(h=>h.items.flatMap(it=>{const e=EXM[it.id];return e?[e.g,...e.sec]:[]})));
   w.order.forEach(wd=>{
+    const yesterday=new Set(H().filter(h=>ymd(h.start)===ymd((w.reported[wd]||Date.now())-DAY)).flatMap(h=>h.items.flatMap(it=>{const e=EXM[it.id];return e?[e.g,...e.sec]:[]})));
     const gs=(w.sore[wd]||[]).filter(g=>GR[g]),d=S.plan.days[wd];if(!d||!gs.length)return;
     const L=weekItems(wd,d.pl),gone=L.filter(it=>gs.includes(EXM[it.id].g)),lost=gone.reduce((a,it)=>a+it.sets,0),next=w.route[wd],nd=next!=null&&S.plan.days[next];
     const future=nd?weekItems(next,nd.pl):[],moved=[],borrow=[];gone.forEach(it=>drop(wd,it.id));
     if(nd){
       const clean=future.filter(it=>it.id!=='warm'&&![EXM[it.id].g,...EXM[it.id].sec].some(g=>gs.includes(g))&&!L.some(q=>q.id===it.id));
       clean.sort((a,b)=>Number([EXM[a.id].g,...EXM[a.id].sec].some(g=>yesterday.has(g)))-Number([EXM[b.id].g,...EXM[b.id].sec].some(g=>yesterday.has(g))));
-      let got=0;for(const it of clean){if(got>=lost)break;const adapted=adaptItems([it],d.pl)[0];if(!adapted||L.some(q=>q.id===adapted.id)||borrow.some(q=>q.id===adapted.id))continue;drop(next,it.id);put(wd,adapted,next);borrow.push(adapted);got+=adapted.sets}
+      let got=0;for(const it of clean){if(got>=lost)break;const adapted=adaptItems([it],d.pl)[0];if(!adapted||[EXM[adapted.id].g,...EXM[adapted.id].sec].some(g=>gs.includes(g))||L.some(q=>q.id===adapted.id)||borrow.some(q=>q.id===adapted.id))continue;drop(next,it.id);put(wd,adapted,next);borrow.push(adapted);got+=adapted.sets}
       gone.forEach(it=>{const q=adaptItems([it],nd.pl)[0];if(q){put(next,q,wd);moved.push(EXM[it.id].g)}else w.omit.push(EXM[it.id].g)});
     }else w.omit.push(...gone.map(it=>EXM[it.id].g));
     const names=[...new Set(gone.map(it=>EXM[it.id].g))].map(g=>GR[g]).join(' und '),instead=[...new Set(borrow.map(it=>EXM[it.id].g))].map(g=>GR[g]).join(' und ');
-    w.msg[wd]=names?(nd&&moved.length?`${names} kommen im nächsten Training (${WDL[next]}), dafür heute ${instead||'weniger Sätze'}.`:`Diese Woche kommt kein passendes Training mehr. ${names} ${gone.length>1?'setzen':'setzt'} diese Woche aus.`):'Nebenmuskeln werden heute mit einem Satz weniger trainiert.';
+    w.msg[wd]=names?(nd&&moved.length?`Übungen für ${names} kommen im nächsten Training (${WDL[w.when[wd]??next]}), dafür heute ${instead||'weniger Sätze'}.`:`Diese Woche kommt kein passendes Training mehr. Übungen für ${names} fallen diese Woche aus.`):'Nebenmuskeln werden heute mit einem Satz weniger trainiert.';
   });w.omit=[...new Set(w.omit)];
 }
 function soreNote(wd){
   const w=S.wk;if(!w||w.wk!==ymd(monday(Date.now())))return'';const gs=w.sore[wd]||[],adds=w.add[wd]||[],incoming=adds.filter(it=>it.from!=null&&(w.sore[it.from]||[]).includes(EXM[it.id].g));
-  return(gs.length?`<p class="note">Muskelkater: ${gs.map(g=>GR[g]).join(', ')}. ${esc(w.msg[wd]||'')}</p>`:'')+(incoming.length?`<p class="note">Heute zusätzlich: ${[...new Set(incoming.map(it=>GR[EXM[it.id].g]))].join(', ')} (vom ${[...new Set(incoming.map(it=>WDL[it.from]))].join(', ')} verschoben).</p>`:'');
+  return(gs.length?`<p class="note">Muskelkater: ${gs.map(g=>GR[g]).join(', ')}. ${esc(w.msg[wd]||'')}</p>`:'')+(incoming.length?`<p class="note">Heute zusätzlich: ${[...new Set(incoming.map(it=>GR[EXM[it.id].g]))].join(', ')} (vom ${[...new Set(incoming.map(it=>WDL[wdOf(w.reported[it.from]||Date.now())]))].join(', ')} verschoben).</p>`:'');
 }
 let SO=null;
 function soreSheet(wd,pl,back=false){
@@ -1079,8 +1081,8 @@ function soreSheet(wd,pl,back=false){
 }
 function drawSore(){openSheet(`<h3>Wo hast du Muskelkater?</h3><p class="muted">Hauptmuskeln setzen heute aus und kommen möglichst im nächsten Training dieser Woche dran. Bei Nebenmuskeln gibt es einen Satz weniger.</p><div class="chips" style="margin:16px 0">${Object.entries(GR).map(([g,l])=>`<button class="chip" data-act="soretoggle" data-v="${g}" aria-pressed="${SO.gs.includes(g)}">${l}</button>`).join('')}</div><button class="btn primary wide" data-act="soreapply">Übernehmen</button><button class="btn ghost wide" data-act="sorereset">Zurücksetzen</button>`)}
 function applySore(gs){
-  if(!SO||S.session)return;const{wd,pl,back}=SO,w=soreWeek(),q=weekQueue().rest,idx=q.indexOf(+wd),next=idx>=0?q[idx+1]:null;
-  if(!w.order.includes(+wd))w.order.push(+wd);if(!(wd in w.route))w.route[wd]=next??null;w.sore[wd]=gs.filter(g=>GR[g]);rebuildSore();save();closeSheet();render();if(back)startSheet(wd,pl);SO=null;
+  if(!SO||S.session)return;const{wd,pl,back}=SO,w=soreWeek(),q=weekQueue().rest,idx=q.indexOf(+wd),slot=Object.keys(S.setup.days).map(Number).sort((a,b)=>a-b).find(d=>d>wdOf(Date.now())),next=idx>=0&&slot!=null?q[idx+1]:null;
+  if(!w.order.includes(+wd))w.order.push(+wd);if(!(wd in w.route)){w.route[wd]=next??null;w.when[wd]=slot??null}w.reported[wd]=Date.now();w.sore[wd]=gs.filter(g=>GR[g]);rebuildSore();save();closeSheet();render();if(back)startSheet(wd,pl);SO=null;
 }
 const nextWd=from=>{for(let i=1;i<=7;i++){const d=(from+i)%7;if(S.plan.days[d])return d}return null};
 /* Erholung: harte Sätze zählen am Hauptmuskel ganz, am Nebenmuskel halb. */
@@ -1102,7 +1104,7 @@ function startEstimate(e){
   out.sort((a,b)=>a.rank-b.rank);return out[0]||null;
 }
 function rirHistory(id){return H().slice().reverse().filter(h=>!h.dl&&h.form!=='muede').map(h=>h.items.find(it=>it.id===id&&it.sets.length)).filter(Boolean).slice(0,2)}
-function rirBlock(){const s=S.session,it=s&&s.items.find(q=>q.id===s.rirAsk);if(!it||it.rir!=null)return'';return`<div class="card" style="margin:14px 0"><p class="small"><b>${esc(it.name)}: Wie viel war noch drin?</b></p><div class="chips" style="margin-top:8px">${[[3,'Noch 3+ drin'],[1,'1 bis 2 drin'],[0,'Am Limit']].map(([v,l])=>`<button class="chip" data-act="rir" data-id="${it.id}" data-v="${v}">${l}</button>`).join('')}</div><p class="muted small">Freiwillig. Du kannst direkt weitertrainieren.</p></div>`}
+function rirBlock(){const s=S.session,it=s&&s.items.find(q=>q.id===s.rirAsk);if(!it||it.rir!=null)return'';return`<div class="card rir" style="margin:14px 0"><p class="small"><b>${esc(it.name)}: Wie viel war noch drin?</b></p><div class="chips" style="margin-top:8px">${[[3,'Noch 3+ drin'],[1,'1 bis 2 drin'],[0,'Am Limit']].map(([v,l])=>`<button class="chip" data-act="rir" data-id="${it.id}" data-v="${v}">${l}</button>`).join('')}</div><p class="muted small">Freiwillig. Du kannst direkt weitertrainieren.</p></div>`}
 function warmBlock(it){
   const s=S.session,e=EXM[it.id];if(s.pl!=='g'||!e.c||it.w<20||!(it.step>0)||s.warmupDone||it.sets.some(x=>x.done))return'';
   if(!it.warm){it.warm=[{p:.5,r:8},{p:.7,r:4},{p:.85,r:2}];save()}
@@ -1154,7 +1156,7 @@ function musBlock(e){
   const one=(L,x)=>{const b=MBASE.map(d=>`<path class="bs" d="${d}"/>`).join(''),m=L.map(([g,d])=>`<path data-m="${g}" d="${d}" style="fill:${col(g)}"/>`).join('');return`<g transform="translate(${x} 0)">${b}<g transform="matrix(-1 0 0 1 120 0)">${b}</g>${m}<g transform="matrix(-1 0 0 1 120 0)">${m}</g></g>`};
   return`<div class="mus">${e.g==='ca'?'':`<svg class="mmini" viewBox="0 0 250 262" aria-hidden="true">${one(MFRONT,0)}${one(MBACK,130)}</svg>`}<p><span>Trainiert</span><b>${main}</b>${sec.length?`<small>Dazu ${sec.map(g=>GR[g]).join(' und ')}</small>`:''}</p></div>`;
 }
-function xrow(it,pl,wd,ctx){const e=EXM[it.id];return`<button class="cell xrow" data-act="info" data-id="${it.id}" data-wd="${wd}" data-pl="${pl}" data-ctx="${ctx}">${figEl(animOf(it.id,pl),'th')}<span class="ct"><b>${esc(e.name)}</b><small>${it.id==='warm'?'':musShort(e)+' · '}${target(e,it,pl)}${it.ss?', im Supersatz':''}</small></span>${ic('chev','chev')}</button>`}
+function xrow(it,pl,wd,ctx){const e=EXM[it.id];if(ctx==='p'&&S.wk&&S.wk.wk===ymd(monday(Date.now()))&&((S.wk.sore[wd]||[]).length||(S.wk.add[wd]||[]).length||(S.wk.drop[wd]||[]).length))ctx='w';return`<button class="cell xrow" data-act="info" data-id="${it.id}" data-wd="${wd}" data-pl="${pl}" data-ctx="${ctx}">${figEl(animOf(it.id,pl),'th')}<span class="ct"><b>${esc(e.name)}</b><small>${it.id==='warm'?'':musShort(e)+' · '}${target(e,it,pl)}${it.ss?', im Supersatz':''}</small></span>${ic('chev','chev')}</button>`}
 const segc=(act,opts,cur,label)=>{const i=Math.max(0,opts.findIndex(o=>String(o[0])===String(cur)));return`<div class="seg" role="group" aria-label="${label}" style="--n:${opts.length};--i:${i}"><i aria-hidden="true"></i>${opts.map(([v,l])=>`<button data-act="${act}" data-v="${v}" aria-pressed="${String(v)===String(cur)}">${l}</button>`).join('')}</div>`};
 const chk=(act,v,on,l)=>`<button class="cell" data-act="${act}" data-v="${v}" aria-pressed="${on}"><span class="ct"><b>${l}</b></span>${on?ic('check','ck'):''}</button>`;
 const tog=(act,on,l,sub,icon,c)=>`<button class="cell" role="switch" aria-checked="${on}" data-act="${act}" data-v="${on?0:1}">${icon?`<span class="ico" style="--c:${c}">${ic(icon)}</span>`:''}<span class="ct"><b>${l}</b>${sub?`<small>${sub}</small>`:''}</span><i class="sw" aria-hidden="true"></i></button>`;
@@ -1646,9 +1648,9 @@ let sheetDragEnd=0;
   document.addEventListener('click',e=>{if(Date.now()-sheetDragEnd<400&&e.target.closest('#sheet')){e.stopPropagation();e.preventDefault()}},true);
 })();
 function infoSheet(id,wd,pl,ctx){
-  const e=EXM[id],it=(S.plan.days[wd]&&S.plan.days[wd].items.find(x=>x.id===id))||{id,sets:e.sets};
-  openSheet(`${figEl(animOf(id,pl),'big',1)}<h3>${esc(e.name)}</h3><p class="muted">${esc(e.cue)}</p>${musBlock(e)}<div class="card" style="margin-top:12px"><p class="ch">${ic('target')}Ziel</p><p style="font-weight:600">${target(e,it,pl)}</p>${gearTxt(id)?`<p class="ch" style="margin-top:12px;--c:var(--gray)">${ic('sliders')}Deine Einstellung</p><p>${esc(gearTxt(id))}</p>`:''}</div>
-    ${id==='warm'?'':`${ctx!=='x'?`<button class="btn ghost wide" data-act="swaplist" data-id="${id}" data-wd="${wd}" data-pl="${pl}" data-ctx="${ctx}">${ic('swap')}Übung tauschen</button>`:''}${ctx==='p'?`<button class="link danger center" data-act="remove" data-id="${id}" data-wd="${wd}">Aus dem Plan entfernen</button>`:''}`}`);
+  const e=EXM[id],it=dayItems(wd,pl).find(x=>x.id===id)||{id,sets:e.sets};
+  openSheet(`${figEl(animOf(id,pl),'big',1)}<h3>${esc(e.name)}</h3><p class="muted">${esc(e.cue)}</p>${musBlock(e)}<div class="card" style="margin-top:12px"><p class="ch">${ic('target')}Ziel</p><p style="font-weight:600">${target(e,it,pl)}</p>${it.note?`<p class="note">${esc(it.note)}</p>`:''}${ctx==='w'?'<p class="note">Nur diese Woche angepasst. Im Training kannst du die Übung tauschen.</p>':''}${gearTxt(id)?`<p class="ch" style="margin-top:12px;--c:var(--gray)">${ic('sliders')}Deine Einstellung</p><p>${esc(gearTxt(id))}</p>`:''}</div>
+    ${id==='warm'?'':`${ctx!=='x'&&ctx!=='w'?`<button class="btn ghost wide" data-act="swaplist" data-id="${id}" data-wd="${wd}" data-pl="${pl}" data-ctx="${ctx}">${ic('swap')}Übung tauschen</button>`:''}${ctx==='p'?`<button class="link danger center" data-act="remove" data-id="${id}" data-wd="${wd}">Aus dem Plan entfernen</button>`:''}`}`);
 }
 function swapSheet(id,wd,pl,ctx){
   const e=EXM[id],cur=ctx==='s'?S.session.items.map(i=>i.id):(S.plan.days[wd]?S.plan.days[wd].items.map(i=>i.id):[]);
@@ -1694,7 +1696,7 @@ function startSession(wd,pl,o){
   if(mu)its.forEach(it=>{const e=EXM[it.id];if(it.id!=='warm'&&e.g!=='ca'&&it.sets>=3)it.sets--});
   its=shorten(its,o.min);
   const items=its.map(it=>mkItem(it,pl));
-  if(mu)items.forEach(it=>{if(it.id==='warm'||EXM[it.id].g==='ca')return;if(it.step>0&&it.w>0&&!it.first){const w=Math.max(it.step,Math.floor(it.w*.9/it.step)*it.step);if(w<it.w){it.w=w;it.sets.forEach(x=>{x.w=w})}}it.note='Müde: ein Satz weniger und etwas leichter. Heute nicht bis ans Limit gehen.';it.up=false});
+  if(mu)items.forEach(it=>{if(it.id==='warm'||EXM[it.id].g==='ca')return;if(it.step>0&&it.w>0&&!it.first){const w=Math.max(it.step,Math.floor(it.w*.9/it.step)*it.step);if(w<it.w){it.w=w;it.sets.forEach(x=>{x.w=w})}}it.note=[it.note,'Müde: ein Satz weniger und etwas leichter. Heute nicht bis ans Limit gehen.'].filter(Boolean).join(' ');it.up=false});
   if(o.form==='fit')items.forEach(it=>{if(it.id!=='warm'&&it.t==='r'&&!it.note)it.note='Du bist fit: Wenn es leicht geht, ruhig eine Wiederholung mehr.'});
   undoSnap=null;
   S.session={start:now,lastAt:now,wd,pl,title:d.title,planned:dayMin(its),form:o.form||'normal',cut:o.min||0,idx:0,items,rest:null,run:null};
@@ -1774,7 +1776,7 @@ function burst(){if(REDUCE.matches)return;const d=document.createElement('div');
 function startRest(sec,why){S.session.rest={endAt:Date.now()+sec*1000,total:sec,fired:false,why:why||''};save();showRest()}
 function showRest(){
   const s=S.session,it=s.items[s.idx],j=it.sets.findIndex(x=>!x.done),el=document.getElementById('rest');
-  el.innerHTML=`<div class="rin"><p class="rl" id="rtitle">${s.rest.total<=25?'Wechsel':'Pause'}</p><div class="dial" id="rdial">${ring('rprog',6)}<div class="val" id="rnum">${fmt((s.rest.endAt-Date.now())/1000)}</div></div><p class="rn">Als Nächstes: ${esc(it.name)}${j>=0?`, Satz ${j+1}`:''}</p>${s.rest.why?`<p class="note up" style="margin:-12px 0 18px">${esc(s.rest.why)}</p>`:''}${rirBlock()}${rateBlock()}${undoSnap?`<button class="undo" data-act="undo">${ic('reset')}Satz rückgängig</button>`:''}<div class="row"><button class="btn ghost" data-act="radj" data-v="-15" aria-label="15 Sekunden weniger">−15 s</button><button class="btn ghost" data-act="radj" data-v="15" aria-label="15 Sekunden mehr">+15 s</button><button class="btn primary" data-act="rskip">Weiter${ic('skip')}</button></div></div>`;
+  el.innerHTML=`<div class="rin"><p class="rl" id="rtitle">${s.rest.total<=25?'Wechsel':'Pause'}</p><div class="dial" id="rdial">${ring('rprog',6)}<div class="val" id="rnum">${fmt((s.rest.endAt-Date.now())/1000)}</div></div><p class="rn">Als Nächstes: ${esc(it.name)}${j>=0?`, Satz ${j+1}`:''}</p>${s.rest.why?`<p class="note up" style="margin:-12px 0 18px">${esc(s.rest.why)}</p>`:''}${rateBlock()}${undoSnap?`<button class="undo" data-act="undo">${ic('reset')}Satz rückgängig</button>`:''}<div class="row"><button class="btn ghost" data-act="radj" data-v="-15" aria-label="15 Sekunden weniger">−15 s</button><button class="btn ghost" data-act="radj" data-v="15" aria-label="15 Sekunden mehr">+15 s</button><button class="btn primary" data-act="rskip">Weiter${ic('skip')}</button></div>${rirBlock()}</div>`;
   el.classList.remove('go');el.classList.add('show');tick();
 }
 function hideRest(){if(S.session&&S.session.rest){S.session.rest=null;save()}document.getElementById('rest').classList.remove('show','go')}
@@ -1785,10 +1787,11 @@ function openFinish(){
     :'<h3>Training beenden?</h3><p class="muted">Noch kein Satz erledigt, es wird nichts gespeichert.</p><button class="btn primary big" data-act="finish">Beenden</button><button class="link center" data-act="sheetclose">Weiter trainieren</button>');
 }
 /* Noch eine Übung: zuerst Übersprungenes nachholen, dann Muskeln, die diese Woche zu kurz kamen */
+const soreGroups=wd=>S.wk&&S.wk.wk===ymd(monday(Date.now()))?(S.wk.sore[wd]||[]):[];
 function extraSugg(){
   const s=S.session,inS=new Set(s.items.map(q=>q.id)),T=targets(),D=doneVol().v,out=[];
   s.items.forEach(q=>{const e=EXM[q.id];if(!e||q.id==='warm'||e.g==='ca')return;const n=q.sets.filter(x=>x.done).length;if(D[e.g]!=null)D[e.g]+=n;e.sec.forEach(g=>{if(D[g]!=null)D[g]+=n/2})});
-  for(const g of GORD.filter(g=>T[g]>0).sort((a,b)=>D[a]/T[a]-D[b]/T[b])){if(out.length>=3)break;const c=EX.filter(x=>x.g===g&&x.t==='r'&&avail(x,s.pl)&&!inS.has(x.id)&&!(S.setup.ban||[]).includes(x.id)).sort((a,b)=>(a.c-b.c)||a.i-b.i);if(c[0])out.push([c[0],g,D[g]/T[g]])}
+  for(const g of GORD.filter(g=>T[g]>0&&!soreGroups(s.wd).includes(g)).sort((a,b)=>D[a]/T[a]-D[b]/T[b])){if(out.length>=3)break;const c=EX.filter(x=>x.g===g&&x.t==='r'&&avail(x,s.pl)&&!inS.has(x.id)&&!(S.setup.ban||[]).includes(x.id)).sort((a,b)=>(a.c-b.c)||a.i-b.i);if(c[0])out.push([c[0],g,D[g]/T[g]])}
   return out;
 }
 function moreBlock(){
@@ -1797,10 +1800,10 @@ function moreBlock(){
 }
 function extraSheet(){
   const s=S.session,inS=new Set(s.items.map(q=>q.id));
-  openSheet(`<h3>Übung dazunehmen</h3>${[...GORD,'fk','ca'].map(g=>{const L=EX.filter(x=>x.g===g&&avail(x,s.pl)&&!inS.has(x.id)&&!(S.setup.ban||[]).includes(x.id));return L.length?`<h3 class="lh">${GRS[g]}</h3><div class="list">${L.map(x=>`<button class="cell xrow" data-act="extra" data-id="${x.id}">${figEl(animOf(x.id,s.pl),'th')}<span class="ct"><b>${esc(x.name)}</b><small>${x.c?'Grundübung':'Isolation'}${x.sec.length?', dazu '+x.sec.filter(q=>GR[q]).map(q=>GR[q]).join(' und '):''}</small></span>${ic('plus','chev')}</button>`).join('')}</div>`:''}).join('')}`);
+  openSheet(`<h3>Übung dazunehmen</h3>${[...GORD,'fk','ca'].map(g=>{const L=EX.filter(x=>x.g===g&&avail(x,s.pl)&&!soreGroups(s.wd).includes(x.g)&&!inS.has(x.id)&&!(S.setup.ban||[]).includes(x.id));return L.length?`<h3 class="lh">${GRS[g]}</h3><div class="list">${L.map(x=>`<button class="cell xrow" data-act="extra" data-id="${x.id}">${figEl(animOf(x.id,s.pl),'th')}<span class="ct"><b>${esc(x.name)}</b><small>${x.c?'Grundübung':'Isolation'}${x.sec.length?', dazu '+x.sec.filter(q=>GR[q]).map(q=>GR[q]).join(' und '):''}</small></span>${ic('plus','chev')}</button>`).join('')}</div>`:''}).join('')}`);
 }
 function addExtra(id){
-  const s=S.session,e=EXM[id];if(!s||!e)return;const it=mkItem({id,sets:e.t==='t'&&e.lo>=300?1:s.form==='muede'?2:3},s.pl);it.extra=1;
+  const s=S.session,e=EXM[id];if(!s||!e||soreGroups(s.wd).includes(e.g))return;const gs=soreGroups(s.wd),sec=e.sec.some(g=>gs.includes(g)),it=mkItem(recoverItem({id,sets:e.t==='t'&&e.lo>=300?1:s.form==='muede'||sec?2:3,note:sec?'Leichter wegen Muskelkater in einem Nebenmuskel.':''}),s.pl);it.extra=1;
   s.items.push(it);s.idx=s.items.length-1;s.run=null;undoSnap=null;closeSheet();save();render();window.scrollTo(0,0);toast(`${e.name} kommt dazu`);
 }
 function finalize(auto){
