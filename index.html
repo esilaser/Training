@@ -514,7 +514,7 @@ const ic=(n,c)=>`<svg class="i${c?' '+c:''}" viewBox="0 0 24 24" aria-hidden="tr
 const fmtN=n=>Math.round(n).toLocaleString('de-DE');
 const ring=(id,w)=>`<svg viewBox="0 0 120 120"><circle class="track" cx="60" cy="60" r="52" fill="none" stroke-width="${w}"/><circle class="prog" id="${id}" cx="60" cy="60" r="52" fill="none" stroke-width="${w}" stroke-linecap="round" stroke-dasharray="${C}" stroke-dashoffset="0"/></svg>`;
 
-/* Übungen: id, Name, Ort (g Gym, h Zuhause, b beides), Muskel, Nebenmuskeln (zählen halb), Art (r Wdh., t Zeit s),
+/* Übungen: id, Name, Ort (g Studio, h Zuhause, b beides), Muskel, Nebenmuskeln (zählen halb), Art (r Wdh., t Zeit s),
    von, bis, Pause s, Steigerung kg, Level, Merkmale (c Grundübung, s Dehnposition), Startgewicht bei 70 kg Körpergewicht, Tipp */
 const LIB=[
 ['brustpresse','Brustpresse','g','br','tr,sc','r',8,12,120,5,1,'c',30,'Rücken an der Lehne, Griffe auf Brusthöhe, vorne nicht ganz durchstrecken.'],
@@ -527,7 +527,7 @@ const LIB=[
 ['dips','Dips','g','br','tr,sc','r',5,12,120,0,2,'cs',0,'Oberkörper leicht nach vorn, tief runter bis zur Dehnung.'],
 ['latzug','Latzug','g','ru','bi','r',8,12,120,5,1,'cs',35,'Stange zur oberen Brust, oben die Arme ganz strecken lassen.'],
 ['rudern_kabel','Rudern am Kabel','g','ru','bi,sc','r',8,12,120,5,1,'c',35,'Aufrecht sitzen, Ellbogen nah am Körper nach hinten.'],
-['rudern_maschine','Rudermaschine','g','ru','bi,sc','r',8,12,120,5,1,'c',35,'Brust ans Polster, Griffe zum Bauch ziehen.'],
+['rudern_maschine','Brustgestütztes Rudern an der Maschine','g','ru','bi,sc','r',8,12,120,5,1,'c',35,'Brust ans Polster, Griffe zum Bauch ziehen.'],
 ['kh_rudern','Kurzhantelrudern','g','ru','bi','r',8,12,90,2,1,'cs',16,'Wiederholungen pro Arm. Rücken gerade, Hantel zur Hüfte.'],
 ['negativ_klimmzug','Negative Klimmzüge','g','ru','bi','r',3,8,120,0,1,'cs',0,'Hochspringen und in 3 bis 5 Sekunden langsam ablassen.'],
 ['klimmzuege','Klimmzüge','g','ru','bi','r',3,10,150,0,2,'cs',0,'Aus dem Hängen hoch, bis das Kinn über der Stange ist.'],
@@ -663,6 +663,21 @@ const LIB=[
 ['fuesse_zur_stange','Füße zur Stange','c','ba','ru','r',5,12,90,0,2,'',0,'Im Hängen die gestreckten Beine bis zur Stange heben, ohne Schwung.'],
 ['situps_eingehakt','Sit-ups mit eingehakten Füßen','c','ba','','r',10,20,60,0,1,'',0,'Füße unter Reck oder Sprossenwand einhaken, langsam hoch und runter.'],
 ['knieheben_schraeg','Knieheben schräg am Barren','c','ba','','r',8,12,60,0,1,'',0,'Wiederholungen pro Seite. Im Stütz die Knie abwechselnd zur linken und rechten Schulter ziehen.'],
+["wadenmaschine_stehend","Wadenheben an der Maschine stehend","g","wa","","r",10,15,60,5,1,"s",30,"Schultern unter die Polster, Knie leicht gebeugt. Fersen langsam senken und weit anheben."],
+["wadenmaschine_sitzend","Wadenheben sitzend an der Maschine","g","wa","","r",12,20,60,5,1,"",20,"Polster knapp hinter die Knie, Fersen langsam tief senken und ohne Schwung anheben."],
+["wadendruecken_beinpresse","Wadendrücken an der Beinpresse","g","wa","","r",10,20,60,5,1,"s",40,"Fußballen sicher auf der Platte, Knie leicht gebeugt halten. Nur die Sprunggelenke bewegen."],
+["tbar_rudern","T-Bar-Rudern","g","ru","bi,sc","r",8,12,120,2.5,2,"c",20,"Hüfte nach hinten, Rücken ruhig. Griffe zum Bauch ziehen. Gewicht der aufgelegten Scheiben."],
+["kabelrudern_einarmig","Einarmiges Kabelrudern","g","ru","bi,sc","r",8,12,90,2.5,1,"c",12.5,"Wiederholungen pro Arm. Rumpf gerade halten, Ellbogen zur Hüfte ziehen."],
+["klimmzug_assist","Klimmzug-Maschine mit Unterstützung","g","ru","bi","r",6,12,120,0,1,"c",0,"Knie aufs Polster, kontrolliert hochziehen. Mehr Unterstützung macht es leichter. Unterstützung unter Geräte-Einstellung notieren."],
+["dip_assist","Dip-Maschine mit Unterstützung","g","br","tr,sc","r",6,12,120,0,1,"c",0,"Knie aufs Polster, leicht vorlehnen, nur schmerzfrei absenken. Mehr Unterstützung macht es leichter. Einstellung am Gerät merken."],
+["trizeps_kickback_kabel","Kabel-Trizeps-Kickback","g","tr","","r",10,15,90,1.25,1,"",3.75,"Wiederholungen pro Arm. Oberkörper vorlehnen, Oberarm ruhig halten und Unterarm nach hinten strecken."],
+["scott_curls","Scott-Curls auf der Larry-Scott-Bank","g","bi","","r",10,15,90,1,1,"",7,"Kurzhantel pro Hand. Oberarm liegt auf dem Polster. Langsam senken, Ellbogen nicht durchdrücken."],
+["kabel_curls_hinten","Kabel-Curls einarmig hinter dem Körper","g","bi","","r",10,15,90,1.25,1,"s",5,"Wiederholungen pro Arm. Tiefes Kabel hinter dir, Oberarm leicht hinter dem Körper lassen."],
+["beinbeuger_liegend","Beinbeuger liegend","g","hi","","r",10,15,90,5,1,"",20,"Knie an der Drehachse, Becken bleibt auf dem Polster. Fersen langsam zum Po ziehen."],
+["kabel_pullthrough","Kabel-Pull-Through","g","hi","ru","r",10,15,90,2.5,1,"c",17.5,"Mit dem Rücken zum tiefen Kabel, Seil zwischen den Beinen. Hüfte zurückschieben und aus dem Po aufrichten."],
+["hipthrust_maschine","Hip Thrust an der Maschine","g","hi","qu","r",8,12,120,5,1,"c",30,"Polster über der Hüfte, Bauch fest. Po oben anspannen, nicht ins Hohlkreuz drücken."],
+["kabel_holzhacker","Kabel-Holzhacker","g","ba","","r",10,15,60,2.5,1,"",7.5,"Wiederholungen pro Seite. Seil diagonal vor dem Körper ziehen, Hüfte kontrolliert mitdrehen."],
+["ab_roller","Ab-Roller","g","ba","sc","r",6,12,90,0,2,"",0,"Auf den Knien starten, Bauch fest. Nur so weit ausrollen, wie du ohne Hohlkreuz zurückkommst."],
 ];
 const EX=LIB.map((a,i)=>({i,id:a[0],name:a[1],pl:a[2],g:a[3],sec:a[4]?a[4].split(','):[],t:a[5],lo:a[6],hi:a[7],rest:a[8],step:a[9],lvl:a[10],c:a[11].includes('c'),s:a[11].includes('s'),sw:a[12],cue:a[13],sets:3}));
 const EXM=Object.fromEntries(EX.map(e=>[e.id,e]));
@@ -809,7 +824,11 @@ l_sitz:{p:'M84 80H130M124 80V140',k:[{h:[100,78],L:[146,76],A:[102,80]},{h:[100,
 fuesse_zur_stange:{e:'h',p:'M76 16H136M130 16V140',k:[{h:[102,92],A:[104,16],l:[-2,46]},{h:[118,82],t:-128,A:[104,16],L:[112,30]}]},
 situps_eingehakt:{es:-1,p:'M118 128H142M138 128V140',k:[{h:[100,128],t:180,L:[128,136],A:[100.4,134]},{h:[100,128],t:-125,L:[128,136],A:[118,104]}]},
 });
+/* Neue Studio-Varianten nutzen dieselben Bewegungsgrundlagen. */
+const AL5={wadenmaschine_stehend:['wadenheben',{e:'h'}],wadenmaschine_sitzend:['wadenheben',{e:'h',p:'M74 110H108M80 110V140M100 110V140',k:[{h:[92,106],L:[124,136],a:[20,26]},{h:[92,106],L:[124,129],a:[20,26]}]}],wadendruecken_beinpresse:['beinpresse',{}],tbar_rudern:['langhantelrudern',{e:'h'}],kabelrudern_einarmig:['rudern_kabel',{}],klimmzug_assist:['klimmzug',{p:'M76 16H136M130 16V140M86 122H116'}],dip_assist:['dips',{p:'M84 80H130M124 80V140M90 126H116'}],trizeps_kickback_kabel:['trizeps_kabel',{ca:'150 136',k:[{h:[92,94],t:-35,L:[100,136],A:[80,114]},{h:[92,94],t:-35,L:[100,136],A:[58,94]}]}],scott_curls:['bizeps_maschine',{e:'db'}],kabel_curls_hinten:['kabel_curls',{ca:'50 138'}],beinbeuger_liegend:['beinbeuger',{e:'h',p:'M64 116H126M70 116V140M120 116V140',k:[{h:[106,108],t:180,L:[150,110],A:[62,120]},{h:[106,108],t:180,L:[124,76],A:[62,120]}]}],kabel_pullthrough:['rdl',{e:['c','h'],ca:'40 136'}],hipthrust_maschine:['hipthrust',{e:'h'}],kabel_holzhacker:['kabel_fly',{ca:'150 16',k:[{h:[100,89],A:[134,40],L:[108,136]},{h:[100,89],t:-75,A:[80,108],L:[108,136]}]}],ab_roller:['liegestuetze',{k:[{h:[92,108],t:-35,L:[64,136],A:[132,137]},{h:[92,121],t:-12,L:[64,136],A:[166,137]}]}]};
+for(const k in AL5){const[b,o]=AL5[k],A=Object.assign({},ANIM[b],o);delete A._k;ANIM[k]=A}
 const EQM={bankdruecken:'b',schraegbank_lh:'b',kniebeuge_lh:'b',kreuzheben:'b',langhantelrudern:'b',hipthrust:'b',kh_bankdruecken:'d',schraegbank_kh:'d',kh_rudern:'d',schulterdruecken_kh:'d',seitheben:'d',frontheben:'d',curls:'d',hammer_curls:'d',trizeps_ueberkopf:'d',french_press:'d',goblet:'d',bulgarian_kh:'d',ausfall_kh:'d',rdl:'d',thruster:'d',farmers:'d',kb_swing:'d',rudern_kabel:'k',kabel_fly:'k',ueberzuege_kabel:'k',seitheben_kabel:'k',facepull:'k',kabel_curls:'k',trizeps_kabel:'k',kabel_crunch:'k',trizeps_ueberkopf_kabel:'k',smith_kniebeuge:'k'};
+Object.assign(EQM,{wadenmaschine_stehend:'m',wadenmaschine_sitzend:'m',wadendruecken_beinpresse:'m',tbar_rudern:'m',kabelrudern_einarmig:'k',klimmzug_assist:'m',dip_assist:'m',trizeps_kickback_kabel:'k',scott_curls:'d',kabel_curls_hinten:'k',beinbeuger_liegend:'m',kabel_pullthrough:'k',hipthrust_maschine:'m',kabel_holzhacker:'k',ab_roller:'w',smith_kniebeuge:'m'});
 const eqOf=e=>EQM[e.id]||(e.step===0?'w':'m');
 const mv=(p,a,l)=>[p[0]+Math.cos(a*RAD)*l,p[1]+Math.sin(a*RAD)*l];
 const angp=(p,q)=>Math.atan2(q[1]-p[1],q[0]-p[0])/RAD;
@@ -867,7 +886,7 @@ function hydrate(){document.querySelectorAll('[data-thumb]').forEach(el=>{if(!el
 (function loop(ts){if(animEls.length){const rs=document.getElementById('rest');if(!rs||!rs.classList.contains('show'))animEls.forEach(el=>{if(el.isConnected)el.innerHTML=fig(el.dataset.anim,ts)})}requestAnimationFrame(loop)})(0);
 
 /* Zustand */
-function defaults(){return{v:4,setup:{days:{0:'g',2:'g',4:'g'},pad:{x:0,y:.1},dur:'auto',lvl:1,split:'auto',goal:'muskel',focus:[],ss:false,mach:true,ban:[],ok:{}},plan:null,swaps:{},history:[],session:null,body:[],settings:{goalKg:0},lastBackup:null,nut:{},meas:[],del:[],meso:null,cloud:null,updated:0,gear:{},ui:{},review:null,boost:null,carry:null,wk:null}}
+function defaults(){return{v:4,setup:{days:{0:'g',2:'g',4:'g'},pad:{x:0,y:.1},dur:'auto',lvl:1,split:'auto',goal:'muskel',focus:[],ss:false,mach:true,ban:[],ok:{}},plan:null,swaps:{},history:[],session:null,body:[],settings:{goalKg:0,barKg:20},lastBackup:null,nut:{},meas:[],del:[],meso:null,cloud:null,updated:0,gear:{},ui:{},review:null,boost:null,carry:null,wk:null}}
 function normalize(s){
   const d=defaults();
   if(!s||typeof s!=='object')return d;
@@ -881,7 +900,7 @@ function normalize(s){
   if(s.v===3){s.swaps={};s.session=null;s.plan=null;s.v=4}
   s.setup=Object.assign(d.setup,s.setup||{});
   ['history','body'].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});
-  s.swaps=s.swaps||{};s.gear=s.gear&&typeof s.gear==='object'?s.gear:{};s.ui=s.ui&&typeof s.ui==='object'?s.ui:{};s.settings=Object.assign({goalKg:0},s.settings||{});s.nut=s.nut||{};s.meas=Array.isArray(s.meas)?s.meas:[];s.del=Array.isArray(s.del)?s.del:[];
+  s.swaps=s.swaps||{};s.gear=s.gear&&typeof s.gear==='object'?s.gear:{};s.ui=s.ui&&typeof s.ui==='object'?s.ui:{};s.settings=Object.assign({goalKg:0,barKg:20},s.settings||{});if(![15,20].includes(s.settings.barKg))s.settings.barKg=20;s.nut=s.nut||{};s.meas=Array.isArray(s.meas)?s.meas:[];s.del=Array.isArray(s.del)?s.del:[];
   if(!s.wk||typeof s.wk!=='object'||Array.isArray(s.wk))s.wk=null;else{for(const k of['sore','add','drop','route','msg'])if(!s.wk[k]||typeof s.wk[k]!=='object'||Array.isArray(s.wk[k]))s.wk[k]={};if(!Array.isArray(s.wk.order))s.wk.order=[];if(!Array.isArray(s.wk.omit))s.wk.omit=[]}
   if(s.session&&!Array.isArray(s.session.items))s.session=null;
   return s;
@@ -954,7 +973,7 @@ function est(e,sets,v){if(e.id==='warm')return 330;if(e.t==='t'&&e.lo>=300)retur
 const PARK=[['stange','Klimmzugstange'],['barren','Barren'],['reck','Niedriges Reck'],['ringe','Ringe'],['bank','Bank oder Box'],['sprossen','Sprossenwand'],['hangel','Hangelleiter']];
 const PEQ={liegestuetze_fuesse_hoch:['bank'],ring_liegestuetze:['ringe'],klimmzug_untergriff:['stange','hangel'],klimmzug_breit:['stange'],schulterblatt_klimmzug:['stange','hangel','sprossen'],reck_rudern_untergriff:['reck','barren'],hangeln:['hangel'],pike_erhoeht:['bank'],ring_facepull:['ringe'],ring_y:['ringe'],barren_shrugs:['barren'],reck_curls:['reck'],ring_curls:['ringe'],negativ_dips:['barren'],barren_stuetz:['barren'],trizeps_reck:['reck','bank','barren'],ring_trizeps:['ringe'],pistol_bank:['bank'],box_jumps:['bank'],hipthrust_bank:['bank'],hipthrust_einbeinig:['bank'],wadenheben_bank:['bank','sprossen','reck'],l_sitz:['barren'],fuesse_zur_stange:['stange','sprossen'],situps_eingehakt:['reck','sprossen'],knieheben_schraeg:['barren'],klimmzuege:['stange','hangel'],negativ_klimmzug:['stange','hangel'],haengen:['stange','hangel','sprossen'],haengendes_beinheben:['stange','sprossen'],dips:['barren'],barren_knieheben:['barren'],reck_rudern:['reck','barren'],ring_rudern:['ringe'],bank_dips:['bank'],bank_liegestuetze:['bank','reck','barren'],bank_bulgarian:['bank'],bank_stepups:['bank'],park_nordic:['reck','sprossen']};
 ['liegestuetze','knie_liegestuetze','diamant_liegestuetze','pike','superman','snow_angel','kniebeuge','ausfall','rueckwaerts_ausfall','seitliche_ausfall','sprungkniebeugen','glute_bridge','einbeinige_bridge','einbeinig_rdl','beinheben','dead_bug','bird_dog','reverse_crunch','plank','crunch','seitstuetz','wadenheben','laufen','hampelmann','knieheben','mountain','burpees','archer_liegestuetze','pseudo_planche','klatsch_liegestuetze','kosaken','kniebeuge_pause','frosch_pumpe','wadenheben_einbeinig','hollow_hold','plank_tap','baerengang','sprints'].forEach(id=>{PEQ[id]=[]});
-const PLN={g:'Gym',h:'Zuhause',c:'Park'},PLACES=[['g','Gym'],['h','Zuhause'],['c','Park']];
+const PLN={g:'Studio',h:'Zuhause',c:'Park'},PLACES=[['g','Studio'],['h','Zuhause'],['c','Park']];
 const parkOk=e=>{const r=PEQ[e.id];return!!r&&(!r.length||r.some(k=>(S.setup.park||[]).includes(k)))};
 const inPl=(e,pl)=>pl==='c'?parkOk(e):(e.pl==='b'||e.pl===pl);
 const avail=(e,pl)=>inPl(e,pl)&&e.lvl<=S.setup.lvl;
@@ -966,7 +985,7 @@ function pick(g,pl,type,items,used,first,comp){
   const mp=pl==='g'&&S.setup.mach!==false,er=e=>({m:0,k:1,w:2,d:3,b:4})[eqOf(e)],key=e=>(mp?er(e)*10:0)+((first||comp)?(e.c?0:4):(e.c?4:0))+((!e.c&&e.s)?0:1);
   const easy=e=>pl!=='g'&&EASY.has(e.id)?6:0,k2=e=>key(e)+easy(e);
   c.sort((a,b)=>k2(a)-k2(b)||(used[a.id]||0)-(used[b.id]||0)||a.i-b.i);
-  /* Im Park und zu Hause wechseln gleichwertige Übungen jede Woche. Im Gym bleiben sie, damit die Steigerung messbar bleibt. */
+  /* Im Park und zu Hause wechseln gleichwertige Übungen jede Woche. Im Studio bleiben sie, damit die Steigerung messbar bleibt. */
   if(pl!=='g'&&c.length>1){const k0=k2(c[0]),u0=used[c[0].id]||0,grp=c.filter(e=>k2(e)===k0&&(used[e.id]||0)===u0);if(grp.length>1)return grp[(weekNo()+GORD.indexOf(g)+(first?0:3))%grp.length]}
   return c[0]||null;
 }
@@ -1256,9 +1275,9 @@ function splitRec(){
   return r;
 }
 function planView(){
-  const P=S.setup,dl={g:'Gym',h:'Home',c:'Park'},c=cyc();
-  const sci=[['Sätze pro Woche','Mehr Sätze bringen mehr Wachstum, mit abnehmendem Zusatznutzen. Du startest bei etwa 10 Sätzen pro großem Muskel.'],['Aufteilung','Ob Ganzkörper oder Split ist bei gleicher Satzzahl fast egal. Entscheidend sind die Sätze pro Woche.'],['Anstrengung','Hör 1 bis 2 Wiederholungen vor dem Muskelversagen auf. Das bringt fast das gleiche Wachstum mit weniger Erschöpfung.'],['Pausen','Mindestens 90 Sekunden, bei schweren Grundübungen 2 Minuten.'],['Übungen','Übungen in der Dehnung werden bevorzugt, zum Beispiel Beinbeuger sitzend, Trizeps über Kopf und Wadenheben stehend.'],['Steigerung','Schaffst du alle Sätze am oberen Ende, gibt es mehr Gewicht. Machst du eine Übung 2 Mal pro Woche, erst nach zwei Einheiten in Folge.'],['Abwechslung','Im Park und zu Hause wechseln gleichwertige Übungen jede Woche. Etwas Abwechslung trainiert den Muskel aus mehr Winkeln. Im Gym bleiben die Übungen gleich, damit die Steigerung gut messbar ist.']];
-  return lth('Plan')+`<h3 class="lh">Trainingstage</h3><div class="card daysc"><div class="days">${WD.map((d,i)=>{const v=P.days[i];return`<button data-act="day" data-d="${i}" class="${v||''}" aria-label="${WDL[i]}: ${v?dl[v]:'frei'}">${d}<small>${v?dl[v]:'frei'}</small></button>`}).join('')}</div></div><p class="lf">Antippen wechselt zwischen Gym, Zuhause, Park und frei. Park heißt Calisthenics mit den Geräten vor Ort.</p>
+  const P=S.setup,dl={g:'Studio',h:'Home',c:'Park'},c=cyc();
+  const sci=[['Sätze pro Woche','Mehr Sätze bringen mehr Wachstum, mit abnehmendem Zusatznutzen. Du startest bei etwa 10 Sätzen pro großem Muskel.'],['Aufteilung','Ob Ganzkörper oder Split ist bei gleicher Satzzahl fast egal. Entscheidend sind die Sätze pro Woche.'],['Anstrengung','Hör 1 bis 2 Wiederholungen vor dem Muskelversagen auf. Das bringt fast das gleiche Wachstum mit weniger Erschöpfung.'],['Pausen','Mindestens 90 Sekunden, bei schweren Grundübungen 2 Minuten.'],['Übungen','Übungen in der Dehnung werden bevorzugt, zum Beispiel Beinbeuger sitzend, Trizeps über Kopf und Wadenheben stehend.'],['Steigerung','Schaffst du alle Sätze am oberen Ende, gibt es mehr Gewicht. Machst du eine Übung 2 Mal pro Woche, erst nach zwei Einheiten in Folge.'],['Abwechslung','Im Park und zu Hause wechseln gleichwertige Übungen jede Woche. Etwas Abwechslung trainiert den Muskel aus mehr Winkeln. Im Studio bleiben die Übungen gleich, damit die Steigerung gut messbar ist.']];
+  return lth('Plan')+`<h3 class="lh">Trainingstage</h3><div class="card daysc"><div class="days">${WD.map((d,i)=>{const v=P.days[i];return`<button data-act="day" data-d="${i}" class="${v||''}" aria-label="${WDL[i]}: ${v?dl[v]:'frei'}">${d}<small>${v?dl[v]:'frei'}</small></button>`}).join('')}</div></div><p class="lf">Antippen wechselt zwischen Studio, Zuhause, Park und frei. Park heißt Calisthenics mit den Geräten vor Ort.</p>
   ${Object.values(P.days).includes('c')||(P.park||[]).length?`<h3 class="lh">Geräte im Park</h3>${parkList()}<p class="lf">Tippe alle Geräte an, die es in deinem Park gibt. Die App stellt die Übungen danach zusammen. Übungen am Boden gehen immer.</p>`:''}
   <h3 class="lh">Ziel</h3><div class="list">${GOALS.map(([v,l])=>chk('goal',v,P.goal===v,l)).join('')}</div><p class="lf">${GOALTXT[P.goal]||''}</p>
   <h3 class="lh">Extra-Fokus</h3><div class="card"><div class="chips">${FOCI.map(([v,l])=>`<button class="chip" data-act="focus" data-v="${v}" aria-pressed="${(P.focus||[]).includes(v)}">${l}</button>`).join('')}</div></div><p class="lf">Optional. Diese Muskeln bekommen etwa 50 % mehr Sätze.</p>
@@ -1266,6 +1285,7 @@ function planView(){
   <h3 class="lh">Schwerpunkt</h3><div class="card"><div class="pad" id="pad" role="slider" aria-label="Schwerpunkt"><span class="lb t">Ausdauer<b id="pa"></b></span><span class="lb b"><b id="pf"></b>Ganzkörper</span><span class="lb l">Ober&shy;körper<b id="pu"></b></span><span class="lb r">Beine<b id="pl"></b></span><i class="knob" id="knob" style="left:${(P.pad.x+1)*50}%;top:${(P.pad.y+1)*50}%"></i></div></div><p class="lf">Links und rechts verteilt die Sätze zwischen Oberkörper und Beinen. Oben kommt Ausdauer dazu, unten mehr Ganzkörperübungen.</p>
   <h3 class="lh">Geräte und Ablauf</h3><div class="list ic">${tog('mach',P.mach!==false,'Maschinen zuerst','Freihanteln nur, wenn keine Maschine passt','sliders','var(--gray)')}${tog('ss',!!P.ss,'Supersätze','Zwei Übungen im Wechsel, spart Zeit','repeat','var(--purple)')}</div><p class="lf">Maschinen führen die Bewegung, dadurch passieren weniger Haltungsfehler. Supersätze sparen etwa ein Drittel der Zeit. Im vollen Studio ist es aber manchmal schwierig, zwei Geräte gleichzeitig zu belegen.</p>
   ${(P.ban||[]).length?`<h3 class="lh">Ausgeblendet</h3><div class="list">${P.ban.map(id=>EXM[id]?`<button class="cell" data-act="unban" data-id="${id}"><span class="ct"><b>${esc(EXM[id].name)}</b></span><span class="cv" style="color:var(--tint)">Zurückholen</span></button>`:'').join('')}</div>`:''}
+  <h3 class="lh">Langhantel-Stange</h3>${segc('bar',[[20,'20 kg'],[15,'15 kg']],S.settings.barKg||20,'Stangengewicht')}<p class="lf">Der Scheibenrechner rechnet mit dieser leeren Stange.</p>
   <h3 class="lh">Dauer pro Training</h3>${segc('dur',[['auto','Auto'],[30,'30 min'],[45,'45 min'],[60,'60 min'],[75,'75 min']],P.dur,'Dauer pro Training')}
     <p class="lf">${P.dur==='auto'?`Auto plant etwa ${planAvg()} min ein, so viel wie die empfohlenen Sätze brauchen. Mit jedem Training rechnet die App genauer mit deinem echten Tempo.`:'Passt nicht alles in die Zeit, kürzt die App zuerst bei Bauch, Waden und Armen.'}</p>
   <h3 class="lh">Zyklus</h3><div class="card"><p><b>Woche ${c.w+1} von 6:</b> ${CYCN[c.w]}</p><div class="cyc">${CYC.map((m,i)=>`<i class="${i===c.w?'on':''}" style="height:${Math.round(m*40)}px"></i>`).join('')}</div></div><p class="lf">${c.dl?'Diese Woche weniger Sätze und etwa 10 % leichter. So erholst du dich und startest danach stärker in den nächsten Zyklus.':'Die Sätze steigen von Woche zu Woche leicht an. In Woche 6 folgt eine leichtere Woche zur Erholung, danach beginnt der nächste Zyklus.'} Trainierst du in einer Woche zu wenig, zum Beispiel nur einmal, geht der Zyklus eine Woche zurück, höchstens bis Woche 1.${c.back?' <b>Diese Woche ist eine Stufe zurück, weil letzte Woche zu wenig trainiert wurde.</b>':''}</p>
@@ -1275,7 +1295,9 @@ function planView(){
   <h3 class="lh">Worauf der Plan basiert</h3><div class="list sci">${sci.map(([a,b])=>`<div class="cell"><b>${a}</b><small>${b}</small></div>`).join('')}</div>`;
 }
 function padLabels(){const w=weights();[['pa','a'],['pf','f'],['pu','u'],['pl','l']].forEach(([id,c])=>{const el=document.getElementById(id);if(el)el.textContent=Math.round(w[c]*20)*5+' %'})}
-function wRow(it){return`<div class="ctl"><span>Gewicht</span><button class="step" data-act="wadj" data-v="-1" aria-label="weniger Gewicht">${ic('minus')}</button><span class="wbox"><input class="wval" inputmode="decimal" data-w="1" value="${it.w?kg(it.w):''}" placeholder="0" aria-label="Gewicht in kg"><span class="wu">kg</span></span><button class="step" data-act="wadj" data-v="1" aria-label="mehr Gewicht">${ic('plus')}</button></div>`}
+function plateLoad(w,bar=S.settings.barKg||20){let left=Math.max(0,(w-bar)/2),plates=[];for(const kg of[25,20,15,10,5,2.5,1.25]){const n=Math.floor((left+.00001)/kg);if(n){plates.push({kg,n});left-=kg*n}}return{plates,actual:r2(bar+plates.reduce((a,p)=>a+p.kg*p.n*2,0)),below:w<bar,exact:w>=bar&&left<.001}}
+function plateSheet(){const it=S.session&&S.session.items[S.session.idx];if(!it||eqOf(EXM[it.id])!=='b')return;const bar=S.settings.barKg||20,p=plateLoad(it.w,bar);openSheet(`<h3>${kg(it.w)} kg auf der Langhantel</h3><p class="muted">Leere Stange: ${bar} kg. Auf jede Seite kommen:</p><div class="list" style="margin-top:14px">${p.plates.map(q=>`<div class="cell"><span class="ct"><b>${q.n} × ${kg(q.kg)} kg</b></span></div>`).join('')||'<div class="cell"><span class="ct"><b>Keine Scheiben</b></span></div>'}</div>${!p.exact?`<p class="note">${p.below?'Die leere Stange ist schon schwerer als dein Ziel.':`Mit diesen Scheiben sind ${kg(p.actual)} kg möglich. Dein Ziel lässt sich mit 1,25-kg-Scheiben nicht genau stecken.`}</p>`:''}<p class="lf">Das Stangengewicht kannst du unter Plan auf 15 oder 20 kg stellen.</p>`)}
+function wRow(it){return`<div class="ctl"><span>Gewicht</span><button class="step" data-act="wadj" data-v="-1" aria-label="weniger Gewicht">${ic('minus')}</button><span class="wbox"><input class="wval" inputmode="decimal" data-w="1" value="${it.w?kg(it.w):''}" placeholder="0" aria-label="Gewicht in kg"><span class="wu">kg</span></span><button class="step" data-act="wadj" data-v="1" aria-label="mehr Gewicht">${ic('plus')}</button></div>${eqOf(EXM[it.id])==='b'?`<button class="link center" data-act="plates">${kg(it.w)} kg: Scheiben pro Seite</button>`:''}`}
 let popSet=null;
 function focusView(){
   const s=S.session,it=s.items[s.idx],j=it.sets.findIndex(x=>!x.done),st=it.sets[Math.max(0,j)],e=EXM[it.id],run=s.run&&s.run.i===s.idx,pj=popSet&&popSet.i===s.idx?popSet.j:-1;popSet=null;
@@ -1902,6 +1924,8 @@ function act(b){
     case'warmdone':{const it=s.items[s.idx],q=it.warm&&it.warm[+b.dataset.i];if(q){q.done=!q.done;if(it.warm.every(x=>x.done))s.warmupDone=true;save();render()}break}
     case'warmskip':s.warmupDone=true;save();render();break;
     case'rir':{const it=s.items.find(q=>q.id===id);if(it&&[0,1,3].includes(+v)){it.rir=+v;s.rirAsk=null;save();render();if(s.rest)showRest();else if(document.getElementById('sheet').classList.contains('show'))openFinish()}break}
+    case'bar':touch();S.settings.barKg=+v===15?15:20;save();render();break;
+    case'plates':plateSheet();break;
     case'busy':busy();break;
     case'busyalt':busyReplace(id);break;
     case'busyagain':busyState(s).seen=[];busyState(s).blocked=[];closeSheet();save();render();break;
