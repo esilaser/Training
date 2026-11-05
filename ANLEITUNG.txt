@@ -29,6 +29,16 @@ Das Symbol auf dem Home-Bildschirm nicht löschen. Damit wären auch die
 Daten weg, außer du hast ein Backup.
 
 NEU IN DIESER VERSION
+- Alle 161 Übungen haben neu gezeichnete Figuren mit klarer Körperhaltung,
+  Händen, Füßen und besser erkennbaren Geräten, Polstern und Griffen.
+- Bei der großen Übungsansicht kannst du pausieren, langsam abspielen und
+  die beiden Bewegungspositionen einzeln ansehen.
+- Mehrere Abläufe wurden gezielt korrigiert, darunter Ab-Roller, Waden an
+  der Beinpresse, Treppensteiger, T-Bar-Rudern und unterstützte Übungen.
+  Bei Curls bleibt der Oberarm ruhig. Gestreckte Arme und Beine bewegen
+  sich auf Bögen. Negative Wiederholungen werden langsam abgesenkt.
+- Die Zeichnungen laufen vollständig offline. Wenn reduzierte Bewegung
+  eingestellt ist, bleiben sie bis zum bewussten Abspielen ruhig.
 - Trainierte Tage werden auch bei einer verschobenen Wochenreihenfolge
   korrekt erkannt. Ein kürzeres gespeichertes Training zählt als Training.
 - Gerät besetzt: Du siehst jede noch offene freie Übung einmal. Erst danach
@@ -64,4 +74,4 @@ NEU IN DIESER VERSION
 
 UPDATE AUF DEM IPHONE
 Mit Internet öffnen, schließen und wieder öffnen. Die Cache-Version
-training-v12 sorgt dafür, dass die neue Version auch offline bleibt.
+training-v13 sorgt dafür, dass die neue Version auch offline bleibt.
