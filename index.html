@@ -1206,13 +1206,13 @@ function todayView(){
     if(done.length){const x=done[done.length-1],sets=x.items.reduce((a,i)=>a+i.sets.length,0);
       return h+note('done','var(--green)',`<h2>Heute erledigt</h2><p class="muted">${esc(x.title)}, ${Math.max(1,Math.round((x.end-x.start)/60000))} min, ${sets} Sätze.${nxt(0)}</p>`)}
     if(head==null)return h+note('done','var(--green)',`<h2>Woche geschafft</h2><p class="muted">Alle Trainings dieser Woche sind erledigt. Ab Montag geht es weiter.</p>${planned?`<button class="btn ghost wide" data-act="anyway" data-wd="${wd}">Trotzdem trainieren</button>`:''}`);
-    const late=head<wd,yday=H().some(x=>ymd(x.start)===ymd(now-DAY));
-    if(late&&!yday)return h+note('moon','var(--indigo)',`<h2>Ruhetag</h2><p class="muted">${WDL[head]} ist ausgefallen: ${esc(S.plan.days[head].title)}. Du kannst es heute nachholen. Sonst kommt es beim nächsten Training dran, damit kein Muskel eine Woche ausfällt.</p><button class="btn primary wide" data-act="anyway" data-wd="${head}">Heute nachholen</button>`);
+    const late=q.missed!=null,yday=H().some(x=>ymd(x.start)===ymd(now-DAY));
+    if(late&&!yday)return h+note('moon','var(--indigo)',`<h2>Ruhetag</h2><p class="muted">${WDL[q.missed]} ist ausgefallen: ${esc(S.plan.days[head].title)}. Du kannst es heute nachholen. Sonst kommt es beim nächsten Training dran, damit kein Muskel eine Woche ausfällt.</p><button class="btn primary wide" data-act="anyway" data-wd="${head}">Heute nachholen</button>`);
     return h+note('moon','var(--indigo)',`<h2>Ruhetag</h2><p class="muted">Erholung gehört zum Muskelaufbau dazu.${nxt(0)}</p><button class="btn ghost wide" data-act="anyway" data-wd="${head}">Trotzdem trainieren</button>`);
   }
   const d=S.plan.days[use],pl=ovPl||(planned?S.plan.days[wd].pl:d.pl),its=dayItems(use,pl);
-  const lab=use===wd?'Training heute':use<wd?`Nachgeholt von ${WDL[use]}`:'Als Nächstes dran';
-  const why=use<wd&&ovWd==null?`<p class="note">${WDL[use]} ist ausgefallen. Damit kein Muskel eine Woche fehlt, kommt dieses Training heute. Der Rest der Woche rutscht nach.</p>`:q.off&&use!==wd&&!H().some(x=>x.start>=monday(now).getTime())?'<p class="note">Die Reihenfolge geht dort weiter, wo du letzte Woche aufgehört hast.</p>':'';
+  const missed=use===head?q.missed:null,lab=missed!=null?`Nachgeholt von ${WDL[missed]}`:planned?'Training heute':'Als Nächstes dran';
+  const why=missed!=null&&ovWd==null?`<p class="note">${WDL[missed]} ist ausgefallen. Damit kein Muskel eine Woche fehlt, kommt dieses Training heute. Der Rest der Woche rutscht nach.</p>`:q.off&&use!==wd&&!H().some(x=>x.start>=monday(now).getTime())?'<p class="note">Die Reihenfolge geht dort weiter, wo du letzte Woche aufgehört hast.</p>':'';
   return h+`<section class="card hero"><p class="ch">${ic('dumbbell')}${lab}</p><h2>${esc(d.title)}</h2><div class="meta"><span>${ic('clock')}Etwa ${dayMin(its)} min</span><span>${ic('list')}${its.length} Übungen</span></div>${why}${soreNote(use)}
     <button class="btn ghost wide" data-act="sore" data-wd="${use}" data-pl="${pl}">Muskelkater?</button>${segc('place',PLACES,pl,'Ort')}${pl==='c'?`<button class="link" data-act="parksheet">${ic('sliders')}${(S.setup.park||[]).length?`Geräte: ${PARK.filter(([k])=>S.setup.park.includes(k)).map(x=>x[1]).join(', ')}`:'Geräte im Park auswählen'}</button>`:''}<button class="btn primary big" data-act="start" data-wd="${use}" data-pl="${pl}">${ic('play')}Training starten</button></section>
     <h3 class="lh">Übungen</h3><div class="list">${its.map(it=>xrow(it,pl,use,pl===d.pl?'p':'x')).join('')}</div>`;
@@ -1230,8 +1230,9 @@ function weighCard(){
 /* Wochenwechsel: Reihenfolge der Trainings, verpasste rutschen nach. Rückblick und Anpassung für die neue Woche. */
 function weekQueue(){
   const now=Date.now(),m=monday(now).getTime(),order=Object.keys(S.plan.days).map(Number).sort((a,b)=>a-b),n=order.length,c=S.carry,off=n&&c&&c.wk===ymd(m)?c.off%n:0;
-  const dn=new Set(H().filter(h=>h.start>=m).map(h=>ymd(h.start)));
-  return{rest:order.slice(off).concat(order.slice(0,off)).slice(dn.size),off};
+  const dn=new Set(H().filter(h=>h.start>=m&&h.start<=now).map(h=>ymd(h.start))),slots=order.slice(Math.min(n,dn.size));
+  const missed=slots.find(d=>{const at=new Date(m);at.setDate(at.getDate()+d);return d<wdOf(now)&&!dn.has(ymd(at))});
+  return{rest:order.slice(off).concat(order.slice(0,off)).slice(dn.size),off,slots,missed};
 }
 function ensureWeek(){
   if(S.onb)return;cyc();const m=monday(Date.now()),wk=ymd(m);if(S.carry&&S.carry.wk===wk){if(S.wk&&S.wk.wk!==wk){S.wk=null;save()}return}
