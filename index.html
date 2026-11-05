@@ -1608,7 +1608,7 @@ function startSession(wd,pl,o){
   S.session={start:now,lastAt:now,wd,pl,title:d.title,planned:dayMin(its),form:o.form||'normal',cut:o.min||0,idx:0,items,rest:null,run:null};
   ovWd=null;ovPl=null;save();persist();wake();window.scrollTo(0,0);render('push');
 }
-function nextIdx(s){const n=s.items.length;for(let k=1;k<=n;k++){const i=(s.idx+k)%n,q=s.items[i];if(!q.skip&&q.sets.some(x=>!x.done))return i}return-1}
+function nextIdx(s){const wait=waitingIdx(s);if(wait>=0)return wait;const n=s.items.length;for(let k=1;k<=n;k++){const i=(s.idx+k)%n,q=s.items[i];if(!q.skip&&q.sets.some(x=>!x.done))return i}return-1}
 function autoAdjust(it,st){
   if(!(it.step>0)||!(st.w>0))return;const nx=it.sets.find(x=>!x.done);if(!nx)return;
   const b=e1(st.w,st.v),raw=b/(1+((nx.p||nx.v)+2)/30);
@@ -1619,11 +1619,13 @@ let undoSnap=null,undoT=0;
 function completeSet(val){
   const s=S.session,it=s.items[s.idx],j=it.sets.findIndex(x=>!x.done);if(j<0)return;
   undoSnap={s:JSON.stringify(s)};clearTimeout(undoT);undoT=setTimeout(()=>{undoSnap=null;document.querySelectorAll('[data-act=undo]').forEach(b=>b.remove())},60000);
+  const busy=busyState(s);busy.seen=[];busy.blocked=[];busy.wait=busy.wait.filter(id=>id!==it.id);
   const st=it.sets[j];if(val!=null)st.v=val;st.w=it.w;st.done=true;s.run=null;s.lastAt=Date.now();autoAdjust(it,st);popSet={i:s.idx,j};
   if(it.id!=='warm'){if(isRecord(it,st))celebrate(it);else burst()}
   if(!it.sets.some(x=>!x.done)&&it.id!=='warm'&&EXM[it.id].g!=='ca'&&!(S.setup.ok||{})[it.id]&&sessionsFor(it.id,it.name).length<2)s.rate=it.id;
   let rest=it.rest;const pi=it.ss?s.items.findIndex((q,k)=>k!==s.idx&&q.ss===it.ss&&!q.skip):-1;
-  if(pi>=0&&s.items[pi].sets.some(x=>!x.done)){rest=s.idx<pi?20:90;s.idx=pi}
+  if(!it.sets.some(x=>!x.done)&&waitingIdx(s)>=0)s.idx=waitingIdx(s);
+  else if(pi>=0&&s.items[pi].sets.some(x=>!x.done)){rest=s.idx<pi?20:90;s.idx=pi}
   else if(!it.sets.some(x=>!x.done)){const nx=nextIdx(s);if(nx<0){save();render();openFinish();return}s.idx=nx;if(it.id==='warm')rest=0}
   let why='';if(it.t==='r'&&st.p&&rest>=60){const miss=st.p-st.v;if(miss>=2){const add=miss>=4?60:30;rest+=add;why=`${add} s länger, weil der Satz ${miss} Wiederholungen unter dem Ziel lag.`}}
   save();render();window.scrollTo(0,0);if(rest>0)startRest(rest,why);
@@ -1641,24 +1643,33 @@ function celebrate(it){
   cf.innerHTML=Array.from({length:30},(_,i)=>{const a=Math.random()*Math.PI*2,r=90+Math.random()*130;return`<i style="background:${CL[i%6]};--x:${(Math.cos(a)*r).toFixed(0)}px;--y:${(Math.sin(a)*r-40).toFixed(0)}px;--r:${(Math.random()*720-360).toFixed(0)}deg;animation-delay:${(Math.random()*.15).toFixed(2)}s"></i>`}).join('');
   document.body.appendChild(cf);setTimeout(()=>{d.remove();cf.remove()},2000);
 }
-/* Gerät besetzt: tauscht mit einer späteren Übung für dieselben Muskeln, die besetzte kommt danach dran */
+/* Gerät besetzt: jede offene Übung einmal, wartende Geräte bleiben in Reihenfolge. */
+function busyState(s){const b=s.busy=s.busy||{};for(const k of['seen','wait','blocked'])if(!Array.isArray(b[k]))b[k]=[];return b}
+function waitingIdx(s){const b=busyState(s);for(const id of b.wait){const i=s.items.findIndex(q=>q.id===id&&!q.skip&&q.sets.some(x=>!x.done));if(i>=0&&i!==s.idx)return i}return-1}
 function busy(){
-  const s=S.session,i=s.idx,it=s.items[i],e=EXM[it.id],pend=k=>k!==i&&!s.items[k].skip&&s.items[k].sets.some(x=>!x.done);
-  if(it.ss)s.items.forEach(q=>{if(q.ss===it.ss)delete q.ss});
-  // Im Park: nur Übungen vorziehen, die nicht auch das besetzte Gerät brauchen
-  const pk=S.setup.park||[],eqs=id=>s.pl==='c'?(PEQ[id]||[]).filter(k=>pk.includes(k)):[],taken=eqs(it.id),freeId=id=>{const r=eqs(id);return!taken.length||!r.length||r.some(k=>!taken.includes(k))};
-  const all=s.items.map((q,k)=>k).filter(pend),fr=all.filter(k=>freeId(s.items[k].id)),fk=fr.filter(k=>EXM[s.items[k].id].g!=='ca'),later=fk.length?fk:fr.length?fr:all,same=later.find(k=>k>i&&EXM[s.items[k].id].g===e.g)??later.find(k=>EXM[s.items[k].id].g===e.g);
-  if(same!=null){const q=s.items[same];s.items[same]=it;s.items[i]=q;s.run=null;save();render();window.scrollTo(0,0);toast(`Jetzt ${q.name}. ${it.name} kommt später dran.`);return}
-  if(later.length){const nx=s.items[later.find(k=>k>i)??later[0]];s.items.splice(i,1);s.items.splice(s.items.indexOf(nx)+1,0,it);s.idx=s.items.indexOf(nx);s.run=null;save();render();window.scrollTo(0,0);toast(`Erst ${nx.name}, danach ${it.name}.`);return}
-  const cur=new Set(s.items.map(q=>q.id)),cand=EX.filter(x=>x.g===e.g&&avail(x,s.pl)&&freeId(x.id)&&!cur.has(x.id)&&!(S.setup.ban||[]).includes(x.id)).sort((a,b)=>(eqOf(a)===eqOf(e))-(eqOf(b)===eqOf(e))||(a.c===e.c?0:1)-(b.c===e.c?0:1)||a.i-b.i),alt=cand[0];
-  if(!alt){toast('Keine Alternative da. Warte kurz oder überspring die Übung.');return}
-  const left=it.sets.filter(x=>!x.done).length,nw=mkItem({id:alt.id,sets:left},s.pl);
-  if(it.sets.some(x=>x.done)){it.sets=it.sets.filter(x=>x.done);s.items.splice(i+1,0,nw);s.idx=i+1}else s.items[i]=nw;
-  s.run=null;save();render();window.scrollTo(0,0);toast(`Stattdessen ${alt.name} für dieselben Muskeln.`);
+  const s=S.session;if(!s)return;const i=s.idx,it=s.items[i],e=EXM[it.id],b=busyState(s);
+  if(it.ss){const pair=it.ss;s.items.forEach(q=>{if(q.ss===pair)delete q.ss})}
+  if(!b.seen.includes(it.id))b.seen.push(it.id);if(!b.wait.includes(it.id))b.wait.push(it.id);
+  const pk=S.setup.park||[],eqs=id=>s.pl==='c'?(PEQ[id]||[]).filter(k=>pk.includes(k)):[];
+  eqs(it.id).forEach(k=>{if(!b.blocked.includes(k))b.blocked.push(k)});
+  const freeId=id=>{const r=eqs(id);return!r.length||r.some(k=>!b.blocked.includes(k))};
+  const later=s.items.filter(q=>q!==it&&!q.skip&&q.sets.some(x=>!x.done)&&!b.seen.includes(q.id)&&freeId(q.id));
+  later.sort((a,c)=>(EXM[c.id].g===e.g)-(EXM[a.id].g===e.g)||(s.pl==='g'?Number(eqOf(EXM[a.id])===eqOf(e))-Number(eqOf(EXM[c.id])===eqOf(e)):0));
+  if(later.length){const nx=later[0];s.items.splice(i,1);s.items.push(it);s.idx=s.items.indexOf(nx);b.seen.push(nx.id);s.run=null;save();render();window.scrollTo(0,0);toast(`Jetzt ${nx.name}. Noch ${later.length-1} andere Übungen offen.`);return}
+  const cur=new Set(s.items.map(q=>q.id)),cand=EX.filter(x=>x.g===e.g&&avail(x,s.pl)&&freeId(x.id)&&!cur.has(x.id)&&!(S.setup.ban||[]).includes(x.id)).sort((a,c)=>Number(eqOf(a)===eqOf(e))-Number(eqOf(c)===eqOf(e))||Number(a.c!==e.c)-Number(c.c!==e.c)||a.i-c.i),alt=cand[0];
+  s.run=null;save();
+  if(!alt){b.seen=[];b.blocked=[];save();toast('Alle freien Übungen angesehen. Keine passende Alternative. Die Runde beginnt von vorn.');return}
+  openSheet(`<h3>Alle freien Übungen angesehen</h3><p class="muted">${esc(it.name)} wartet auf ein Gerät. Als Ersatz für dieselben Muskeln:</p><div class="list" style="margin-top:14px"><button class="cell xrow" data-act="busyalt" data-id="${alt.id}">${figEl(alt.id,'th')}<span class="ct"><b>${esc(alt.name)}</b><small>Verbleibende Sätze übernehmen</small></span>${ic('chev','chev')}</button></div><button class="btn ghost wide" data-act="busyagain">Neue Runde beginnen</button>`);
+}
+function busyReplace(id){
+  const s=S.session,it=s.items[s.idx],e=EXM[id];if(!e||s.items.some(q=>q.id===id))return;
+  const nw=mkItem({id,sets:it.sets.filter(x=>!x.done).length},s.pl),b=busyState(s);b.wait=b.wait.filter(x=>x!==it.id);b.seen=[];b.blocked=[];
+  if(it.sets.some(x=>x.done)){it.sets=it.sets.filter(x=>x.done);s.items.splice(++s.idx,0,nw)}else s.items[s.idx]=nw;
+  s.run=null;closeSheet();save();render();window.scrollTo(0,0);toast(`Stattdessen ${e.name} für dieselben Muskeln.`);
 }
 function overviewSheet(){
   const s=S.session;openSheet(`<h3>Übersicht</h3><div class="list ic">${s.items.map((q,i)=>{const n=q.sets.filter(x=>x.done).length,dn=!q.skip&&q.sets.every(x=>x.done),st=i===s.idx?'Jetzt dran':q.skip?'Übersprungen, tippen zum Nachholen':dn?'Erledigt':`${n} von ${q.sets.length} Sätzen`;
-    return`<button class="cell" data-act="jump" data-i="${i}" ${dn&&i!==s.idx?'disabled':''}><span class="ico" style="--c:${dn?'var(--green)':i===s.idx?'var(--tint)':q.skip?'var(--orange)':'var(--gray)'}">${ic(dn?'check':q.skip?'skip':'dumbbell')}</span><span class="ct"><b>${esc(q.name)}</b><small>${st}${q.ss?', im Supersatz':''}</small></span></button>`}).join('')}</div><p class="lf">Tippe auf eine Übung, um sie jetzt zu machen.</p>`);
+    return`<button class="cell" data-act="jump" data-i="${i}" ${dn&&i!==s.idx?'disabled':''}><span class="ico" style="--c:${dn?'var(--green)':i===s.idx?'var(--tint)':q.skip?'var(--orange)':'var(--gray)'}">${ic(dn?'check':q.skip?'skip':'dumbbell')}</span><span class="ct"><b>${esc(q.name)}</b><small>${st}${(s.busy&&s.busy.wait||[]).includes(q.id)?', Gerät war besetzt':''}${q.ss?', im Supersatz':''}</small></span></button>`}).join('')}</div><p class="lf">Tippe auf eine Übung, um sie jetzt zu machen.</p>`);
 }
 function parkList(){const pk=S.setup.park||[];return`<div class="list">${PARK.map(([k,l])=>`<button class="cell" role="switch" aria-checked="${pk.includes(k)}" data-act="parkeq" data-k="${k}"><span class="ct"><b>${l}</b></span><i class="sw" aria-hidden="true"></i></button>`).join('')}</div>`}
 function parkSheet(){openSheet(`<h3>Geräte im Park</h3><p class="muted">Tippe alle Geräte an, die es dort gibt. Übungen am Boden gehen immer.</p><div style="margin-top:14px">${parkList()}</div>`)}
@@ -1816,6 +1827,8 @@ function act(b){
     case'stime':SF.min=+v;startSheet(SF.wd,SF.pl);break;
     case'go':closeSheet();startSession(SF.wd,SF.pl,{form:v,min:SF.min});SF.min=0;break;
     case'busy':busy();break;
+    case'busyalt':busyReplace(id);break;
+    case'busyagain':busyState(s).seen=[];busyState(s).blocked=[];closeSheet();save();render();break;
     case'undo':{if(undoSnap){S.session=JSON.parse(undoSnap.s);S.session.rest=null;undoSnap=null;clearTimeout(undoT);document.getElementById('rest').classList.remove('show','go');closeSheet();save();render();toast('Satz zurückgenommen')}break}
     case'gear':gearSheet(id);break;
     case'gearsave':{const g=k=>((document.getElementById(k)||{}).value||'').trim().slice(0,24),o={sitz:g('gS'),polster:g('gP'),notiz:g('gN')};S.gear=S.gear||{};if(o.sitz||o.polster||o.notiz){o.at=Date.now();S.gear[id]=o}else delete S.gear[id];save();closeSheet();render();toast('Einstellung gemerkt');break}
