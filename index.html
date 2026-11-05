@@ -867,7 +867,7 @@ function hydrate(){document.querySelectorAll('[data-thumb]').forEach(el=>{if(!el
 (function loop(ts){if(animEls.length){const rs=document.getElementById('rest');if(!rs||!rs.classList.contains('show'))animEls.forEach(el=>{if(el.isConnected)el.innerHTML=fig(el.dataset.anim,ts)})}requestAnimationFrame(loop)})(0);
 
 /* Zustand */
-function defaults(){return{v:4,setup:{days:{0:'g',2:'g',4:'g'},pad:{x:0,y:.1},dur:'auto',lvl:1,split:'auto',goal:'muskel',focus:[],ss:false,mach:true,ban:[],ok:{}},plan:null,swaps:{},history:[],session:null,body:[],settings:{goalKg:0},lastBackup:null,nut:{},meas:[],del:[],meso:null,cloud:null,updated:0,gear:{},ui:{},review:null,boost:null,carry:null}}
+function defaults(){return{v:4,setup:{days:{0:'g',2:'g',4:'g'},pad:{x:0,y:.1},dur:'auto',lvl:1,split:'auto',goal:'muskel',focus:[],ss:false,mach:true,ban:[],ok:{}},plan:null,swaps:{},history:[],session:null,body:[],settings:{goalKg:0},lastBackup:null,nut:{},meas:[],del:[],meso:null,cloud:null,updated:0,gear:{},ui:{},review:null,boost:null,carry:null,wk:null}}
 function normalize(s){
   const d=defaults();
   if(!s||typeof s!=='object')return d;
@@ -882,6 +882,7 @@ function normalize(s){
   s.setup=Object.assign(d.setup,s.setup||{});
   ['history','body'].forEach(k=>{if(!Array.isArray(s[k]))s[k]=[]});
   s.swaps=s.swaps||{};s.gear=s.gear&&typeof s.gear==='object'?s.gear:{};s.ui=s.ui&&typeof s.ui==='object'?s.ui:{};s.settings=Object.assign({goalKg:0},s.settings||{});s.nut=s.nut||{};s.meas=Array.isArray(s.meas)?s.meas:[];s.del=Array.isArray(s.del)?s.del:[];
+  if(!s.wk||typeof s.wk!=='object'||Array.isArray(s.wk))s.wk=null;else{for(const k of['sore','add','drop','route','msg'])if(!s.wk[k]||typeof s.wk[k]!=='object'||Array.isArray(s.wk[k]))s.wk[k]={};if(!Array.isArray(s.wk.order))s.wk.order=[];if(!Array.isArray(s.wk.omit))s.wk.omit=[]}
   if(s.session&&!Array.isArray(s.session.items))s.session=null;
   return s;
 }
@@ -1005,16 +1006,62 @@ function genPlan(){
   const PT={};GORD.forEach(g=>{PT[g]=0});for(const wd in days)days[wd].items.forEach(it=>{const e=EXM[it.id];if(PT[e.g]!=null&&e.g!=='ca')PT[e.g]+=it.sets});
   S.plan={ver:6,days,T:PT,types,C,wk:ymd(monday(Date.now()))};
   for(const wd in days){const d=days[wd];d.items=d.items.map(it=>{const sw=S.swaps[wd+':'+it.id];if(!sw)return it;if(sw==='-')return null;const e=EXM[sw];return e&&avail(e,d.pl)?{id:sw,o:it.id,ss:it.ss,sets:it.sets,v:e.t==='t'&&e.lo>=300?Math.max(e.lo,it.v||0):undefined}:it}).filter(Boolean)}
-  save();
+  rebuildSore();save();
 }
 const dayMin=items=>{let s=items.reduce((a,it)=>a+est(EXM[it.id],it.sets,it.v),0);const seen=new Set();items.forEach(it=>{if(it.ss&&!seen.has(it.ss)){seen.add(it.ss);const p=items.find(x=>x!==it&&x.ss===it.ss);if(p)s-=Math.min(it.sets,p.sets)*Math.max(0,RR(EXM[it.id]).rest+RR(EXM[p.id]).rest-110)}});return Math.max(5,Math.round(s/60*calib()/5)*5)};
 const planAvg=()=>{const d=Object.values(S.plan.days);return d.length?Math.round(d.reduce((a,x)=>a+dayMin(x.items),0)/d.length/5)*5:0};
 function altFor(e,pl,ex){const ok=x=>avail(x,pl)&&!ex.has(x.id)&&!(S.setup.ban||[]).includes(x.id);return EX.find(x=>ok(x)&&x.g===e.g&&x.c===e.c)||EX.find(x=>ok(x)&&x.g===e.g)}
+function adaptItems(items,pl){
+  const out=[],ex=new Set();
+  items.forEach(it=>{const e=EXM[it.id];if(!e)return;const a=it.id==='warm'||inPl(e,pl)?e:altFor(e,pl,ex);if(!a)return;
+    const q={...it,id:a.id,sets:a.t==='t'&&a.lo<300&&e.lo>=300?3:it.sets,v:a.t==='t'&&a.lo>=300?Math.max(a.lo,it.v||0):undefined};
+    const old=out.find(x=>x.id===q.id);if(old)old.sets+=q.sets;else{out.push(q);ex.add(q.id)}
+  });return out;
+}
+function baseDayItems(wd,pl){const d=S.plan.days[wd];return d?adaptItems(d.items,pl):[]}
+function weekItems(wd,pl){
+  const d=S.plan.days[wd];if(!d)return[];const w=S.wk,active=w&&w.wk===ymd(monday(Date.now())),drop=active&&Array.isArray(w.drop[wd])?w.drop[wd]:[];
+  const L=d.items.filter(it=>!drop.includes(it.id)).map(it=>({...it}));
+  if(active)(w.add[wd]||[]).forEach(it=>{const old=L.find(x=>x.id===it.id);if(old){old.sets+=it.sets;old.from=it.from}else L.push({...it})});
+  return adaptItems(L,pl);
+}
 function dayItems(wd,pl){
-  const d=S.plan.days[wd];if(!d)return[];if(pl===d.pl)return d.items;
-  const ex=new Set();
-  return d.items.map(it=>{const e=EXM[it.id];if(it.id==='warm'||e.pl==='b'||e.pl===pl){ex.add(it.id);return it}
-    const a=altFor(e,pl,ex);if(!a)return null;ex.add(a.id);return{id:a.id,ss:it.ss,sets:a.t==='t'&&a.lo<300&&e.lo>=300?3:it.sets,v:a.t==='t'&&a.lo>=300?Math.max(a.lo,it.v||0):undefined}}).filter(Boolean);
+  const L=weekItems(wd,pl),w=S.wk,gs=w&&w.wk===ymd(monday(Date.now()))&&Array.isArray(w.sore[wd])?w.sore[wd]:[];
+  return L.filter(it=>!gs.includes(EXM[it.id].g)).map(it=>{const sec=EXM[it.id].sec.filter(g=>gs.includes(g));if(sec.length){it.sets=Math.max(1,it.sets-1);it.note=`Leichter wegen Muskelkater im Bereich ${sec.map(g=>GR[g]).join(' und ')}. Ein Satz weniger.`}return it});
+}
+function soreWeek(){const wk=ymd(monday(Date.now()));if(!S.wk||S.wk.wk!==wk)S.wk={wk,sore:{},add:{},drop:{},route:{},order:[],msg:{},omit:[]};return S.wk}
+function rebuildSore(){
+  const w=S.wk;if(!w||w.wk!==ymd(monday(Date.now())))return;w.add={};w.drop={};w.msg={};w.omit=[];
+  const drop=(wd,id)=>{const L=w.drop[wd]=w.drop[wd]||[];if(!L.includes(id))L.push(id);w.add[wd]=(w.add[wd]||[]).filter(q=>q.id!==id)};
+  const put=(wd,it,from)=>{const L=w.add[wd]=w.add[wd]||[],old=L.find(q=>q.id===it.id);if(old)old.sets+=it.sets;else L.push({...it,ss:undefined,from})};
+  const yesterday=new Set(H().filter(h=>ymd(h.start)===ymd(Date.now()-DAY)).flatMap(h=>h.items.flatMap(it=>{const e=EXM[it.id];return e?[e.g,...e.sec]:[]})));
+  w.order.forEach(wd=>{
+    const gs=(w.sore[wd]||[]).filter(g=>GR[g]),d=S.plan.days[wd];if(!d||!gs.length)return;
+    const L=weekItems(wd,d.pl),gone=L.filter(it=>gs.includes(EXM[it.id].g)),lost=gone.reduce((a,it)=>a+it.sets,0),next=w.route[wd],nd=next!=null&&S.plan.days[next];
+    const future=nd?weekItems(next,nd.pl):[],moved=[],borrow=[];gone.forEach(it=>drop(wd,it.id));
+    if(nd){
+      const clean=future.filter(it=>it.id!=='warm'&&![EXM[it.id].g,...EXM[it.id].sec].some(g=>gs.includes(g))&&!L.some(q=>q.id===it.id));
+      clean.sort((a,b)=>Number([EXM[a.id].g,...EXM[a.id].sec].some(g=>yesterday.has(g)))-Number([EXM[b.id].g,...EXM[b.id].sec].some(g=>yesterday.has(g))));
+      let got=0;for(const it of clean){if(got>=lost)break;const adapted=adaptItems([it],d.pl)[0];if(!adapted||L.some(q=>q.id===adapted.id)||borrow.some(q=>q.id===adapted.id))continue;drop(next,it.id);put(wd,adapted,next);borrow.push(adapted);got+=adapted.sets}
+      gone.forEach(it=>{const q=adaptItems([it],nd.pl)[0];if(q){put(next,q,wd);moved.push(EXM[it.id].g)}else w.omit.push(EXM[it.id].g)});
+    }else w.omit.push(...gone.map(it=>EXM[it.id].g));
+    const names=[...new Set(gone.map(it=>EXM[it.id].g))].map(g=>GR[g]).join(' und '),instead=[...new Set(borrow.map(it=>EXM[it.id].g))].map(g=>GR[g]).join(' und ');
+    w.msg[wd]=names?(nd&&moved.length?`${names} kommen im nächsten Training (${WDL[next]}), dafür heute ${instead||'weniger Sätze'}.`:`Diese Woche kommt kein passendes Training mehr. ${names} ${gone.length>1?'setzen':'setzt'} diese Woche aus.`):'Nebenmuskeln werden heute mit einem Satz weniger trainiert.';
+  });w.omit=[...new Set(w.omit)];
+}
+function soreNote(wd){
+  const w=S.wk;if(!w||w.wk!==ymd(monday(Date.now())))return'';const gs=w.sore[wd]||[],adds=w.add[wd]||[],incoming=adds.filter(it=>it.from!=null&&(w.sore[it.from]||[]).includes(EXM[it.id].g));
+  return(gs.length?`<p class="note">Muskelkater: ${gs.map(g=>GR[g]).join(', ')}. ${esc(w.msg[wd]||'')}</p>`:'')+(incoming.length?`<p class="note">Heute zusätzlich: ${[...new Set(incoming.map(it=>GR[EXM[it.id].g]))].join(', ')} (vom ${[...new Set(incoming.map(it=>WDL[it.from]))].join(', ')} verschoben).</p>`:'');
+}
+let SO=null;
+function soreSheet(wd,pl,back=false){
+  if(S.session){toast('Muskelkater bitte vor dem Trainingsstart melden.');return}
+  SO={wd,pl,back,gs:[...(soreWeek().sore[wd]||[])]};drawSore();
+}
+function drawSore(){openSheet(`<h3>Wo hast du Muskelkater?</h3><p class="muted">Hauptmuskeln setzen heute aus und kommen möglichst im nächsten Training dieser Woche dran. Bei Nebenmuskeln gibt es einen Satz weniger.</p><div class="chips" style="margin:16px 0">${Object.entries(GR).map(([g,l])=>`<button class="chip" data-act="soretoggle" data-v="${g}" aria-pressed="${SO.gs.includes(g)}">${l}</button>`).join('')}</div><button class="btn primary wide" data-act="soreapply">Übernehmen</button><button class="btn ghost wide" data-act="sorereset">Zurücksetzen</button>`)}
+function applySore(gs){
+  if(!SO||S.session)return;const{wd,pl,back}=SO,w=soreWeek(),q=weekQueue().rest,idx=q.indexOf(+wd),next=idx>=0?q[idx+1]:null;
+  if(!w.order.includes(+wd))w.order.push(+wd);if(!(wd in w.route))w.route[wd]=next??null;w.sore[wd]=gs.filter(g=>GR[g]);rebuildSore();save();closeSheet();render();if(back)startSheet(wd,pl);SO=null;
 }
 const nextWd=from=>{for(let i=1;i<=7;i++){const d=(from+i)%7;if(S.plan.days[d])return d}return null};
 /* Steigerung: geschätztes Maximum (Epley), 1 bis 2 Wiederholungen im Tank, Häufigkeit pro Woche */
@@ -1117,8 +1164,8 @@ function todayView(){
   const d=S.plan.days[use],pl=ovPl||(planned?S.plan.days[wd].pl:d.pl),its=dayItems(use,pl);
   const lab=use===wd?'Training heute':use<wd?`Nachgeholt von ${WDL[use]}`:'Als Nächstes dran';
   const why=use<wd&&ovWd==null?`<p class="note">${WDL[use]} ist ausgefallen. Damit kein Muskel eine Woche fehlt, kommt dieses Training heute. Der Rest der Woche rutscht nach.</p>`:q.off&&use!==wd&&!H().some(x=>x.start>=monday(now).getTime())?'<p class="note">Die Reihenfolge geht dort weiter, wo du letzte Woche aufgehört hast.</p>':'';
-  return h+`<section class="card hero"><p class="ch">${ic('dumbbell')}${lab}</p><h2>${esc(d.title)}</h2><div class="meta"><span>${ic('clock')}Etwa ${dayMin(its)} min</span><span>${ic('list')}${its.length} Übungen</span></div>${why}
-    ${segc('place',PLACES,pl,'Ort')}${pl==='c'?`<button class="link" data-act="parksheet">${ic('sliders')}${(S.setup.park||[]).length?`Geräte: ${PARK.filter(([k])=>S.setup.park.includes(k)).map(x=>x[1]).join(', ')}`:'Geräte im Park auswählen'}</button>`:''}<button class="btn primary big" data-act="start" data-wd="${use}" data-pl="${pl}">${ic('play')}Training starten</button></section>
+  return h+`<section class="card hero"><p class="ch">${ic('dumbbell')}${lab}</p><h2>${esc(d.title)}</h2><div class="meta"><span>${ic('clock')}Etwa ${dayMin(its)} min</span><span>${ic('list')}${its.length} Übungen</span></div>${why}${soreNote(use)}
+    <button class="btn ghost wide" data-act="sore" data-wd="${use}" data-pl="${pl}">Muskelkater?</button>${segc('place',PLACES,pl,'Ort')}${pl==='c'?`<button class="link" data-act="parksheet">${ic('sliders')}${(S.setup.park||[]).length?`Geräte: ${PARK.filter(([k])=>S.setup.park.includes(k)).map(x=>x[1]).join(', ')}`:'Geräte im Park auswählen'}</button>`:''}<button class="btn primary big" data-act="start" data-wd="${use}" data-pl="${pl}">${ic('play')}Training starten</button></section>
     <h3 class="lh">Übungen</h3><div class="list">${its.map(it=>xrow(it,pl,use,pl===d.pl?'p':'x')).join('')}</div>`;
 }
 /* Morgens wiegen: kleine Karte vor 12 Uhr, wenn heute noch nichts eingetragen ist */
@@ -1138,16 +1185,16 @@ function weekQueue(){
   return{rest:order.slice(off).concat(order.slice(0,off)).slice(dn.size),off};
 }
 function ensureWeek(){
-  if(S.onb)return;cyc();const m=monday(Date.now()),wk=ymd(m);if(S.carry&&S.carry.wk===wk)return;
+  if(S.onb)return;cyc();const m=monday(Date.now()),wk=ymd(m);if(S.carry&&S.carry.wk===wk){if(S.wk&&S.wk.wk!==wk){S.wk=null;save()}return}
   const lm=new Date(m);lm.setDate(m.getDate()-7);const lt=lm.getTime(),mt=m.getTime(),n=Object.keys(S.setup.days).length,k=new Set(H().filter(h=>h.start>=lt&&h.start<mt).map(h=>ymd(h.start))).size;
   const prev=S.carry&&S.carry.wk===ymd(lm)?S.carry.off:0;
   S.carry={wk,off:n?(prev+Math.min(k,n))%n:0};S.boost=null;
-  S.review=S.history.length&&S.plan&&n?makeReview(lt,mt,k,n,wk):null;
+  S.review=S.history.length&&S.plan&&n?makeReview(lt,mt,k,n,wk):null;if(S.wk&&S.wk.wk!==wk)S.wk=null;
   save();
 }
 function makeReview(lt,mt,k,n,wk){
   const L=H().filter(h=>h.start>=lt&&h.start<mt),D=volOf(L.flatMap(h=>h.items.map(it=>[it.id,0,it.sets.length]))).v,T=targets(),C=cyc(),cw=C.w,f=CYC[S.meso.prev??((cw+5)%6)]/CYC[cw],short=[];
-  GORD.forEach(g=>{const t=Math.round((T[g]||0)*f);if(t>0&&D[g]<t*.6)short.push([g,D[g]/t])});short.sort((a,b)=>a[1]-b[1]);
+  GORD.forEach(g=>{const t=Math.round((T[g]||0)*f);if(t>0&&D[g]<t*.6&&!(S.wk&&S.wk.wk===ymd(lt)&&(S.wk.omit||[]).includes(g)))short.push([g,D[g]/t])});short.sort((a,b)=>a[1]-b[1]);
   const sh=short.slice(0,2).map(x=>x[0]),adj=[],boost=k>=n?sh:[];
   if(boost.length){S.boost={wk,gs:boost};adj.push(`${boost.map(g=>GR[g]).join(' und ')} ${boost.length>1?'bekommen':'bekommt'} diese Woche etwa 25 % mehr Sätze.`)}
   if(k&&k<n)adj.push('Die Woche startet mit dem Training, das zuletzt ausgefallen ist. So kommt kein Muskel zu kurz.');
@@ -1195,7 +1242,7 @@ function planView(){
     <p class="lf">${P.dur==='auto'?`Auto plant etwa ${planAvg()} min ein, so viel wie die empfohlenen Sätze brauchen. Mit jedem Training rechnet die App genauer mit deinem echten Tempo.`:'Passt nicht alles in die Zeit, kürzt die App zuerst bei Bauch, Waden und Armen.'}</p>
   <h3 class="lh">Zyklus</h3><div class="card"><p><b>Woche ${c.w+1} von 6:</b> ${CYCN[c.w]}</p><div class="cyc">${CYC.map((m,i)=>`<i class="${i===c.w?'on':''}" style="height:${Math.round(m*40)}px"></i>`).join('')}</div></div><p class="lf">${c.dl?'Diese Woche weniger Sätze und etwa 10 % leichter. So erholst du dich und startest danach stärker in den nächsten Zyklus.':'Die Sätze steigen von Woche zu Woche leicht an. In Woche 6 folgt eine leichtere Woche zur Erholung, danach beginnt der nächste Zyklus.'} Trainierst du in einer Woche zu wenig, zum Beispiel nur einmal, geht der Zyklus eine Woche zurück, höchstens bis Woche 1.${c.back?' <b>Diese Woche ist eine Stufe zurück, weil letzte Woche zu wenig trainiert wurde.</b>':''}</p>
   <h2 class="sh">Deine Woche</h2>
-  ${Object.keys(S.plan.days).map(wd=>{const d=S.plan.days[wd];return`<h3 class="lh"><span>${WDL[wd]}, ${esc(d.title)}</span><span>${PLN[d.pl]}, ${dayMin(d.items)} min</span></h3><div class="list">${d.items.map(it=>xrow(it,d.pl,wd,'p')).join('')}</div>`}).join('')||'<p class="muted">Wähle oben mindestens einen Trainingstag.</p>'}
+  ${Object.keys(S.plan.days).map(wd=>{const d=S.plan.days[wd],items=dayItems(wd,d.pl);return`${soreNote(wd)}<h3 class="lh"><span>${WDL[wd]}, ${esc(d.title)}</span><span>${PLN[d.pl]}, ${dayMin(items)} min</span></h3><div class="list">${items.map(it=>xrow(it,d.pl,wd,'p')).join('')}</div>`}).join('')||'<p class="muted">Wähle oben mindestens einen Trainingstag.</p>'}
   <h3 class="lh">Erfahrung</h3>${segc('lvl',[[1,'Anfänger'],[2,'Fortgeschritten']],P.lvl,'Erfahrung')}<p class="lf">Fortgeschritten bringt etwa 40 % mehr Sätze und schwerere Übungen wie Kreuzheben und Klimmzüge.</p>
   <h3 class="lh">Worauf der Plan basiert</h3><div class="list sci">${sci.map(([a,b])=>`<div class="cell"><b>${a}</b><small>${b}</small></div>`).join('')}</div>`;
 }
@@ -1571,7 +1618,7 @@ function startSheet(wd,pl){
   if(SF.min){const cut=shorten(its.map(x=>Object.assign({},x)),SF.min),ids=new Set(cut.map(x=>x.id)),gone=its.filter(x=>x.id!=='warm'&&!ids.has(x.id)).length,nc=cut.filter(x=>x.id!=='warm'&&EXM[x.id].c).length,nss=cut.filter(x=>x.ss).length;
     info=`Etwa ${dayMin(cut)} min: ${nc} Grundübung${nc===1?'':'en'} bleiben${nss?`, ${nss} Übungen als Supersätze`:''}${gone?`, ${gone} ${gone===1?'fällt':'fallen'} heute weg`:''}.`}
   openSheet(`<h3>Bereit?</h3>${opts.length?`<h3 class="lh">Zeit heute</h3>${segc('stime',[[0,'Alles'],...opts.map(m=>[m,m+' min'])],SF.min,'Zeit heute')}<p class="lf">${info}</p>`:''}
-    <h3 class="lh">Wie fühlst du dich?</h3><div class="list ic">
+    ${soreNote(wd)}<div class="list"><button class="cell" data-act="sore" data-wd="${wd}" data-pl="${pl}" data-back="1"><span class="ct"><b>Muskelkater melden</b></span>${ic('chev','chev')}</button></div><h3 class="lh">Wie fühlst du dich?</h3><div class="list ic">
     <button class="cell" data-act="go" data-v="fit"><span class="ico" style="--c:var(--green)">${ic('bolt')}</span><span class="ct"><b>Fit</b><small>Wie geplant, gern an die obere Grenze gehen</small></span>${ic('chev','chev')}</button>
     <button class="cell" data-act="go" data-v="normal"><span class="ico" style="--c:var(--tint)">${ic('dumbbell')}</span><span class="ct"><b>Normal</b><small>Training wie geplant</small></span>${ic('chev','chev')}</button>
     <button class="cell" data-act="go" data-v="muede"><span class="ico" style="--c:var(--indigo)">${ic('moon')}</span><span class="ct"><b>Müde</b><small>Ein Satz weniger pro Übung und etwa 10 % leichter</small></span>${ic('chev','chev')}</button></div>
@@ -1594,7 +1641,7 @@ function shorten(L,min){
 }
 function mkItem(it,pl){
   const e=EXM[it.id],step=stepFor(e,pl),sg=suggest(e,it,step);
-  return{id:e.id,name:e.name,ss:it.ss,t:e.t,rest:RR(e).rest,step,w:sg.w,first:!!sg.first,note:sg.note||'',up:!!sg.up,sets:sg.v.map(v=>({v,p:v,w:sg.w,done:false}))};
+  return{id:e.id,name:e.name,ss:it.ss,t:e.t,rest:RR(e).rest,step,w:sg.w,first:!!sg.first,note:[sg.note,it.note].filter(Boolean).join(' '),up:!!sg.up,sets:sg.v.map(v=>({v,p:v,w:sg.w,done:false}))};
 }
 function startSession(wd,pl,o){
   o=o||{};const d=S.plan.days[wd];if(!d)return;const now=Date.now(),mu=o.form==='muede';
@@ -1826,6 +1873,10 @@ function act(b){
     case'start':startSheet(+wd,b.dataset.pl);break;
     case'stime':SF.min=+v;startSheet(SF.wd,SF.pl);break;
     case'go':closeSheet();startSession(SF.wd,SF.pl,{form:v,min:SF.min});SF.min=0;break;
+    case'sore':soreSheet(+wd,b.dataset.pl,b.dataset.back==='1');break;
+    case'soretoggle':if(SO){const i=SO.gs.indexOf(v);i<0?SO.gs.push(v):SO.gs.splice(i,1);drawSore()}break;
+    case'soreapply':applySore(SO.gs);break;
+    case'sorereset':applySore([]);break;
     case'busy':busy();break;
     case'busyalt':busyReplace(id);break;
     case'busyagain':busyState(s).seen=[];busyState(s).blocked=[];closeSheet();save();render();break;
