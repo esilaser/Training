@@ -1319,7 +1319,7 @@ function progressView(){
   const tile=(i,c,l,val)=>`<div><p class="ch" style="--c:${c}">${ic(i)}${l}</p><b>${val}</b></div>`;
   h+=`<h2 class="sh">Überblick</h2><div class="tiles">${tile('dumbbell','var(--tint)','Trainings',all.length)}${tile('clock','var(--orange)','Zeit',mins>=60?kg(Math.round(mins/6)/10)+'<small> h</small>':mins+'<small> min</small>')}${tile('list','var(--t2)','Sätze',totSets)}${tile('flame','var(--red)','Wochen mit Ziel',streak)}</div>
     <div class="card" style="margin-top:10px"><p class="ch">${ic('chart')}Trainings pro Woche</p>${bars(cnt,lab)}<p class="ch" style="margin-top:16px">${ic('chart')}Sätze pro Woche</p>${bars(sets,lab)}</div>`;
-  h+=`<h2 class="sh">Körper</h2>`+bodyCard()+measCard();
+  h+=`<h2 class="sh">Körper</h2>`+bodyCard();
   const L=new Map();
   all.forEach(x=>x.items.forEach(it=>{const k=it.id||it.name;if(!L.has(k))L.set(k,{name:it.name,t:it.t,pts:[],last:0,bestAt:0});const o=L.get(k),w=it.sets[0].w||0;
     const val=it.t==='t'?Math.max(...it.sets.map(s=>s.v)):w?Math.max(...it.sets.map(s=>e1(s.w,s.v))):Math.max(...it.sets.map(s=>s.v));
@@ -1337,7 +1337,7 @@ function progressView(){
     ${backupText!==null?`<div class="card" style="margin-top:12px"><textarea class="field ta" id="bt" readonly aria-label="Backup als Text">${esc(backupText)}</textarea><button class="btn ghost wide" data-act="copybt">Text kopieren</button></div>`:''}
     ${pasteOpen?'<div class="card" style="margin-top:12px"><textarea class="field ta" id="pt" placeholder="Backup-Text hier einfügen" aria-label="Backup-Text"></textarea><button class="btn ghost wide" data-act="pasteload">Aus Text laden</button></div>':''}
     <input type="file" id="file" accept=".json,application/json,text/plain" hidden>`;
-  h+=`<div class="list" style="margin-top:22px"><button class="cell danger" data-act="reset"><span class="ct"><b>${armed==='reset'?'Nochmal tippen: alles löschen':'Fortschritt zurücksetzen'}</b></span></button></div><p class="lf">Löscht alle Trainings, Körpergewicht und Maße dieses Profils, auch in der Cloud. Der Zyklus beginnt wieder bei Woche 1. Plan, Einstellungen, Konto und Team bleiben.</p>`;
+  h+=`<div class="list" style="margin-top:22px"><button class="cell danger" data-act="reset"><span class="ct"><b>${armed==='reset'?'Nochmal tippen: alles löschen':'Fortschritt zurücksetzen'}</b></span></button></div><p class="lf">Löscht alle Trainings und das Körpergewicht dieses Profils, auch in der Cloud. Der Zyklus beginnt wieder bei Woche 1. Plan, Einstellungen, Konto und Team bleiben.</p>`;
   return h;
 }
 /* Muskelkarte: Sätze pro Muskel und Woche gegen das Ziel. Nebenmuskeln zählen halb, so wie in den Studien. */
@@ -1428,15 +1428,6 @@ function pairItems(items){
   items.splice(0,items.length,...out);
 }
 
-/* Körpermaße */
-const MS=[['taille','Taille'],['huefte','Hüfte'],['brust','Brust'],['arm','Oberarm'],['bein','Oberschenkel']];
-function measCard(){
-  const M=[...(S.meas||[])].sort((a,b)=>a.d<b.d?-1:1),f=M[0],l=M[M.length-1];
-  return`<section class="card"><p class="ch" style="--c:var(--teal)">${ic('ruler')}Körpermaße</p><p class="muted small">Alle 2 bis 4 Wochen morgens messen reicht. Beim Muskelaufbau zeigen die Maße oft mehr als die Waage.</p>
-  ${M.length?`<div class="tiles" style="margin-top:12px">${MS.filter(([k])=>l[k]).map(([k,n])=>`<div><b>${kg(l[k])}</b><small>${n}${M.length>1&&f[k]&&f!==l?`, ${sign(l[k]-f[k])} cm`:' in cm'}</small></div>`).join('')}</div>`:''}
-  <div class="mgrid">${MS.map(([k,n])=>`<label><span>${n}</span><input class="field num" inputmode="decimal" data-ms="${k}" placeholder="cm" aria-label="${n} in cm"></label>`).join('')}</div>
-  <button class="btn primary wide" data-act="meas">Maße speichern</button></section>`;
-}
 /* Cloud: Firebase per REST, eigenes Konto pro Profil, Trainings werden zusammengeführt */
 const FBCFG={apiKey:'AIzaSyDTCb8JTtj23xp7DHS8tcCEGOWz9xEP1Sc',projectId:'traning-c6b1e'};
 function FB(){try{const c=JSON.parse(localStorage.getItem('training-fb')||'null');if(c&&c.apiKey&&c.projectId)return c}catch(e){}return FBCFG.apiKey?FBCFG:null}
@@ -1818,7 +1809,6 @@ function act(b){
   switch(a){
     case'day':{touch();const d=+b.dataset.d,c=S.setup.days[d];if(!c)S.setup.days[d]='g';else if(c==='g')S.setup.days[d]='h';else if(c==='h')S.setup.days[d]='c';else delete S.setup.days[d];genPlan();render();break}
     case'ss':touch();S.setup.ss=v==='1';genPlan();render();break;
-    case'meas':{const en={d:ymd(Date.now())};let ok=false;document.querySelectorAll('[data-ms]').forEach(i=>{const x=num(i.value);if(x>=20&&x<=250){en[i.dataset.ms]=r2(x);ok=true}});if(!ok){toast('Trag mindestens ein Maß in cm ein');break}S.meas=(S.meas||[]).filter(m=>m.d!==en.d).concat(en);save();kick();render();toast('Maße gespeichert');break}
     case'fbcfgtoggle':CFGOPEN=!CFGOPEN;render();break;
     case'fbcfg':{const k=(document.getElementById('fbK').value||'').trim(),p=(document.getElementById('fbI').value||'').trim();if(k&&p){try{localStorage.setItem('training-fb',JSON.stringify({apiKey:k,projectId:p}))}catch(e){}render();toast('Gespeichert')}break}
     case'fblogin':case'fbsignup':{const em=(document.getElementById('fbE').value||'').trim(),pw=document.getElementById('fbP').value||'';if(!em||!pw){toast('E-Mail und Passwort eintragen');break}
